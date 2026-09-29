@@ -1,4 +1,5 @@
 import MaterialSymbol from '@/components/directory/material-symbol';
+import { t } from '@/lib/i18n';
 
 export default function FieldError({ message }: { message?: string }) {
     if (!message) {
@@ -11,7 +12,7 @@ export default function FieldError({ message }: { message?: string }) {
             className="flex items-center gap-1 text-label-sm text-error"
         >
             <MaterialSymbol name="error" className="text-base" />
-            {message}
+            {t(message)}
         </p>
     );
 }

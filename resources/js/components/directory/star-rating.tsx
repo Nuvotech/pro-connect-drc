@@ -1,5 +1,6 @@
 import MaterialSymbol from '@/components/directory/material-symbol';
 import { cn } from '@/lib/utils';
+import { t } from '@/lib/i18n';
 
 type StarRatingProps = {
     rating: number;
@@ -18,7 +19,7 @@ export default function StarRating({
                 'flex items-center text-secondary-container',
                 className,
             )}
-            aria-label={`${rating} out of 5 stars`}
+            aria-label={t(':rating out of 5 stars', { rating })}
         >
             {[1, 2, 3, 4, 5].map((position) => {
                 if (rating >= position) {

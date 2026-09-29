@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
@@ -17,9 +17,13 @@ import StepCategory from '@/components/directory/quote-request/step-category';
 import StepContact from '@/components/directory/quote-request/step-contact';
 import StepLocation from '@/components/directory/quote-request/step-location';
 import StepProjectDetails from '@/components/directory/quote-request/step-project-details';
-import { findCategory } from '@/lib/directory-data';
+import { useCategories } from '@/hooks/use-categories';
+import { useVisitorLocation } from '@/hooks/use-visitor-location';
+import { cn } from '@/lib/utils';
 import { show as showCategory } from '@/routes/categories';
+import { store as storeQuoteRequest } from '@/routes/quote-requests';
 import type { Professional } from '@/types';
+import { t } from '@/lib/i18n';
 
 type QuoteRequestDialogProps = {
     isOpen: boolean;
@@ -36,27 +40,19 @@ export default function QuoteRequestDialog({
     categorySlug,
     professional,
 }: QuoteRequestDialogProps) {
-    const scrollContainer = useRef<HTMLDivElement>(null);
-
     return (
         <DialogPrimitive.Root open={isOpen} onOpenChange={onOpenChange}>
             <DialogPrimitive.Portal>
-                <DialogPrimitive.Overlay
-                    ref={scrollContainer}
-                    className="proconnect fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-on-background/60 backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 sm:p-4 md:p-12"
-                >
+                <DialogPrimitive.Overlay className="proconnect fixed inset-0 z-50 grid place-items-center bg-on-background/60 backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 sm:p-4">
                     <DialogPrimitive.Content
                         aria-describedby={undefined}
-                        className="relative flex min-h-dvh w-full max-w-4xl flex-col overflow-hidden bg-surface-container-lowest shadow-xl duration-200 data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:zoom-in-95 sm:min-h-0 sm:rounded-2xl"
+                        className="relative flex h-dvh w-full flex-col overflow-hidden bg-surface-container-lowest shadow-xl duration-200 data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:zoom-in-95 sm:h-auto sm:max-h-[min(40rem,calc(100dvh-2rem))] sm:max-w-xl sm:rounded-2xl"
                     >
                         <QuoteRequestFlow
                             key={sessionKey}
                             initialCategorySlug={categorySlug}
                             professional={professional}
                             onClose={() => onOpenChange(false)}
-                            onStepChange={() =>
-                                scrollContainer.current?.scrollTo({ top: 0 })
-                            }
                         />
                     </DialogPrimitive.Content>
                 </DialogPrimitive.Overlay>
@@ -69,21 +65,23 @@ type QuoteRequestFlowProps = {
     initialCategorySlug?: string;
     professional?: Professional;
     onClose: () => void;
-    onStepChange: () => void;
 };
 
 function QuoteRequestFlow({
     initialCategorySlug,
     professional,
     onClose,
-    onStepChange,
 }: QuoteRequestFlowProps) {
+    const body = useRef<HTMLDivElement>(null);
+    const { city: visitorCity } = useVisitorLocation();
     const [step, setStep] = useState(0);
-    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [reference, setReference] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<QuoteRequestErrors>({});
     const [data, setData] = useState<QuoteRequestData>(() =>
         emptyQuoteRequest(
             initialCategorySlug ?? professional?.categorySlug ?? '',
+            visitorCity,
         ),
     );
     const photosRef = useRef(data.photos);
@@ -100,7 +98,6 @@ function QuoteRequestFlow({
         };
     }, []);
 
-    const currentStep = quoteSteps[step];
     const isLastStep = step === quoteSteps.length - 1;
 
     function setField<TKey extends keyof QuoteRequestData>(
@@ -113,7 +110,7 @@ function QuoteRequestFlow({
 
     function goToStep(nextStep: number) {
         setStep(nextStep);
-        onStepChange();
+        body.current?.scrollTo({ top: 0 });
     }
 
     function submitStep(event: FormEvent<HTMLFormElement>) {
@@ -127,8 +124,7 @@ function QuoteRequestFlow({
         }
 
         if (isLastStep) {
-            setIsSubmitted(true);
-            onStepChange();
+            submitRequest();
 
             return;
         }
@@ -136,11 +132,88 @@ function QuoteRequestFlow({
         goToStep(step + 1);
     }
 
-    if (isSubmitted) {
+    /**
+     * Send the request, then show the reference, or jump back to the first
+     * step with a problem.
+     */
+    function submitRequest() {
+        router.post(
+            storeQuoteRequest.url(),
+            {
+                category: data.categorySlug,
+                professional: professional?.slug,
+                service_type: data.serviceType,
+                description: data.description,
+                timing: data.timing,
+                city: data.city,
+                commune: data.commune,
+                address: data.address,
+                assessment: data.assessment,
+                full_name: data.fullName,
+                phone: data.phone,
+                email: data.email,
+                contact_channel: data.contactChannel,
+                photos: data.photos.map((photo) => photo.file),
+            },
+            {
+                forceFormData: true,
+                preserveScroll: true,
+                preserveState: true,
+                onStart: () => setIsSubmitting(true),
+                onFinish: () => setIsSubmitting(false),
+                onFlash: (flash) => {
+                    setReference(
+                        (flash as { reference?: string }).reference ?? '',
+                    );
+                },
+                onError: (serverErrors) => {
+                    const fieldSteps: [
+                        keyof QuoteRequestErrors,
+                        string,
+                        number,
+                    ][] = [
+                        ['categorySlug', 'category', 0],
+                        ['serviceType', 'service_type', 1],
+                        ['description', 'description', 1],
+                        ['timing', 'timing', 1],
+                        ['photos', 'photos', 1],
+                        ['city', 'city', 2],
+                        ['commune', 'commune', 2],
+                        ['address', 'address', 2],
+                        ['assessment', 'assessment', 2],
+                        ['fullName', 'full_name', 3],
+                        ['phone', 'phone', 3],
+                        ['email', 'email', 3],
+                        ['contactChannel', 'contact_channel', 3],
+                    ];
+                    const mapped: QuoteRequestErrors = {};
+                    let firstStep = quoteSteps.length - 1;
+
+                    for (const [field, serverKey, fieldStep] of fieldSteps) {
+                        const message =
+                            serverErrors[serverKey] ??
+                            Object.entries(serverErrors).find(([key]) =>
+                                key.startsWith(`${serverKey}.`),
+                            )?.[1];
+
+                        if (message) {
+                            mapped[field] = message;
+                            firstStep = Math.min(firstStep, fieldStep);
+                        }
+                    }
+
+                    setErrors(mapped);
+                    goToStep(firstStep);
+                },
+            },
+        );
+    }
+
+    if (reference !== null) {
         return (
             <QuoteRequestSuccess
+                reference={reference}
                 data={data}
-                professional={professional}
                 onClose={onClose}
             />
         );
@@ -149,192 +222,174 @@ function QuoteRequestFlow({
     const stepProps = { data, errors, setField };
 
     return (
-        <form onSubmit={submitStep} noValidate className="flex flex-1 flex-col">
-            <div className="flex flex-col gap-4 bg-surface-container-low px-6 pt-6 pb-6 md:px-10 md:pt-8">
+        <form
+            onSubmit={submitStep}
+            noValidate
+            className="flex min-h-0 flex-1 flex-col"
+        >
+            <header className="flex flex-col gap-3 px-5 pt-5 pb-4 sm:px-6">
                 <div className="flex items-center justify-between gap-4">
-                    <DialogPrimitive.Title className="text-headline-md font-bold text-primary">
-                        ProConnect RDC
-                        <span className="sr-only"> — Get a Quote</span>
+                    <DialogPrimitive.Title className="text-headline-md text-on-surface">
+                        {t('Get free quotes')}
                     </DialogPrimitive.Title>
                     <DialogPrimitive.Close
-                        className="flex items-center text-on-surface-variant transition-colors duration-200 hover:text-primary"
-                        aria-label="Close"
+                        aria-label={t('Close')}
+                        className="-mr-2 flex size-10 cursor-pointer items-center justify-center rounded-full text-on-surface-variant transition-colors duration-200 hover:bg-surface-container-low hover:text-primary"
                     >
                         <MaterialSymbol name="close" />
                     </DialogPrimitive.Close>
                 </div>
-                <div className="flex flex-col justify-between gap-2 text-on-surface-variant sm:flex-row sm:items-center">
-                    <div className="flex items-center gap-2">
-                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary-container text-label-md text-on-primary">
-                            {step + 1}
+                <div className="flex flex-col gap-2">
+                    <p className="text-label-sm text-on-surface-variant">
+                        {t('Step')} {step + 1} {t('of')} {quoteSteps.length} ·{' '}
+                        <span className="text-on-surface">
+                            {t(quoteSteps[step])}
                         </span>
-                        <span className="text-label-md font-semibold tracking-wider text-on-surface uppercase">
-                            Step {step + 1} of {quoteSteps.length}
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <MaterialSymbol
-                            name={currentStep.icon}
-                            filled
-                            className="text-body-md text-primary"
-                        />
-                        <span className="text-label-md font-medium text-primary">
-                            {currentStep.label} •{' '}
-                            <span className="font-normal text-on-surface-variant">
-                                {currentStep.labelFr}
-                            </span>
-                        </span>
-                    </div>
-                </div>
-                <div
-                    role="progressbar"
-                    aria-valuemin={1}
-                    aria-valuemax={quoteSteps.length}
-                    aria-valuenow={step + 1}
-                    aria-label="Quote request progress"
-                    className="flex h-2 w-full overflow-hidden rounded-full bg-surface-variant"
-                >
+                    </p>
                     <div
-                        className="h-full rounded-full bg-primary-container transition-all duration-500 ease-out"
-                        style={{
-                            width: `${((step + 1) / quoteSteps.length) * 100}%`,
-                        }}
-                    />
+                        role="progressbar"
+                        aria-valuemin={1}
+                        aria-valuemax={quoteSteps.length}
+                        aria-valuenow={step + 1}
+                        aria-label={t('Quote request progress')}
+                        className="grid grid-cols-4 gap-1.5"
+                    >
+                        {quoteSteps.map((label, index) => (
+                            <span
+                                key={label}
+                                className={cn(
+                                    'h-1 rounded-full transition-colors duration-300',
+                                    index <= step
+                                        ? 'bg-primary'
+                                        : 'bg-surface-variant',
+                                )}
+                            />
+                        ))}
+                    </div>
                 </div>
                 {professional && (
-                    <div className="flex items-center gap-3 rounded-lg bg-surface-container-lowest p-3 shadow-sm">
+                    <p className="flex items-center gap-2 text-label-sm text-on-surface-variant">
                         <img
                             src={professional.photo}
                             alt=""
-                            className="h-9 w-9 rounded-full object-cover"
+                            className="size-6 rounded-full object-cover"
                         />
-                        <p className="text-label-sm text-on-surface-variant">
-                            Requesting a quote from{' '}
-                            <span className="font-semibold text-on-surface">
-                                {professional.name}
-                            </span>{' '}
-                            — {professional.title}
-                        </p>
-                    </div>
+                        {t('For')}{' '}
+                        <span className="font-semibold text-on-surface">
+                            {professional.name}
+                        </span>
+                    </p>
                 )}
-            </div>
+            </header>
 
-            <div className="flex-1 p-6 md:p-10">
+            <div
+                ref={body}
+                className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 sm:px-6"
+            >
                 {step === 0 && <StepCategory {...stepProps} />}
                 {step === 1 && <StepProjectDetails {...stepProps} />}
                 {step === 2 && <StepLocation {...stepProps} />}
-                {step === 3 && (
-                    <StepContact {...stepProps} professional={professional} />
-                )}
+                {step === 3 && <StepContact {...stepProps} />}
             </div>
 
-            <div className="flex flex-col-reverse items-center justify-between gap-4 border-t border-outline-variant px-6 py-6 sm:flex-row md:px-10">
+            <footer className="flex items-center justify-between gap-3 border-t border-outline-variant px-5 py-3 sm:px-6">
                 {step > 0 ? (
                     <button
                         type="button"
                         onClick={() => goToStep(step - 1)}
-                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-surface-container-low px-6 py-3.5 text-label-md text-primary shadow-xs transition-colors duration-200 hover:bg-surface-container sm:w-auto"
+                        className="flex h-11 cursor-pointer items-center gap-1 rounded-lg px-3 text-label-md text-on-surface-variant transition-colors duration-200 hover:bg-surface-container-low hover:text-primary"
                     >
-                        <MaterialSymbol name="arrow_back" className="text-lg" />
-                        <span>Back / Précédent</span>
+                        <MaterialSymbol
+                            name="arrow_back"
+                            className="text-[18px]"
+                        />
+                        {t('Back')}
                     </button>
                 ) : (
-                    <span className="hidden sm:block" />
+                    <span />
                 )}
                 <button
                     type="submit"
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-8 py-3.5 text-label-md text-on-primary shadow-md transition-all duration-200 hover:bg-primary hover:shadow-lg active:scale-[0.99] sm:w-auto"
+                    disabled={isSubmitting}
+                    className="flex h-11 cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-6 text-label-md text-on-primary transition-opacity duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                    {isLastStep ? (
-                        <>
-                            <span>
-                                Submit Request &amp; Get Quotes / Envoyer la
-                                demande
-                            </span>
-                            <MaterialSymbol
-                                name="send"
-                                filled
-                                className="text-lg"
-                            />
-                        </>
-                    ) : (
-                        <>
-                            <span>Next Step / Étape suivante</span>
-                            <MaterialSymbol
-                                name="arrow_forward"
-                                className="text-lg"
-                            />
-                        </>
+                    {isLastStep
+                        ? isSubmitting
+                            ? t('Sending…')
+                            : t('Send request')
+                        : t('Continue')}
+                    {!isSubmitting && (
+                        <MaterialSymbol
+                            name={isLastStep ? 'send' : 'arrow_forward'}
+                            className="text-[18px]"
+                        />
                     )}
                 </button>
-            </div>
+            </footer>
         </form>
     );
 }
 
 type QuoteRequestSuccessProps = {
+    reference: string;
     data: QuoteRequestData;
-    professional?: Professional;
     onClose: () => void;
 };
 
 function QuoteRequestSuccess({
+    reference,
     data,
-    professional,
     onClose,
 }: QuoteRequestSuccessProps) {
+    const { findCategory } = useCategories();
     const category = findCategory(data.categorySlug);
     const channel = contactChannels.find(
         ({ value }) => value === data.contactChannel,
     );
 
     return (
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-16 text-center md:px-10">
-            <DialogPrimitive.Title className="sr-only">
-                Quote request sent
-            </DialogPrimitive.Title>
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-fixed text-primary">
-                <MaterialSymbol
-                    name="check_circle"
-                    filled
-                    className="text-5xl"
-                />
-            </div>
-            <div className="flex max-w-lg flex-col gap-2">
-                <h2 className="text-headline-lg-mobile text-primary md:text-headline-lg">
-                    Request sent! / Demande envoyée
-                </h2>
-                <p className="text-body-md text-on-surface-variant">
-                    {professional
-                        ? `${professional.name} and up to 2 other verified pros`
-                        : 'Up to 3 verified pros'}{' '}
-                    in {data.commune}, {data.city} will contact you via{' '}
-                    <span className="font-semibold text-on-surface">
-                        {channel?.label}
-                    </span>{' '}
-                    within 24 hours.
-                    <span className="mt-1 block text-label-sm text-outline">
-                        Vous recevrez vos devis gratuits sous 24 heures.
+        <div className="flex flex-1 flex-col items-center justify-center gap-5 px-6 py-12 text-center">
+            <MaterialSymbol
+                name="check_circle"
+                filled
+                className="text-[56px] text-primary"
+            />
+            <div className="flex max-w-sm flex-col items-center gap-2">
+                <DialogPrimitive.Title className="text-headline-md text-on-surface">
+                    {t('Request sent')}
+                </DialogPrimitive.Title>
+                {reference && (
+                    <span className="rounded-md bg-surface-container-low px-2.5 py-1 font-mono text-label-md text-on-surface">
+                        {reference}
                     </span>
+                )}
+                <p className="text-body-md text-on-surface-variant">
+                    {t("We'll match you with verified pros in")} {data.commune},{' '}
+                    {data.city}
+                    {t(". They'll contact you by")}{' '}
+                    {channel?.label.toLowerCase() === 'call'
+                        ? t('phone')
+                        : channel?.label}
+                    .
                 </p>
             </div>
-            <div className="flex w-full flex-col-reverse items-center justify-center gap-4 sm:w-auto sm:flex-row">
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row-reverse">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="h-11 cursor-pointer rounded-lg bg-primary px-8 text-label-md text-on-primary transition-opacity hover:opacity-90"
+                >
+                    {t('Done')}
+                </button>
                 {category && (
                     <Link
                         href={showCategory(category.slug)}
                         onClick={onClose}
-                        className="w-full rounded-lg border border-primary bg-surface-container-lowest px-6 py-3 text-label-md text-primary transition-colors hover:bg-surface-container-low sm:w-auto"
+                        className="flex h-11 items-center justify-center rounded-lg px-5 text-label-md text-primary transition-colors hover:bg-surface-container-low"
                     >
-                        Browse {category.name}
+                        {t('Browse')} {category.name}
                     </Link>
                 )}
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="w-full rounded-lg bg-primary-container px-8 py-3 text-label-md text-on-primary shadow-md transition-all hover:bg-primary sm:w-auto"
-                >
-                    Done / Terminé
-                </button>
             </div>
         </div>
     );

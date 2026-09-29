@@ -22,6 +22,24 @@ return [
         'key' => env('RESEND_API_KEY'),
     ],
 
+    'contact' => [
+        // Where contact-form messages are forwarded, as well as the admin inbox.
+        'email' => env('CONTACT_EMAIL'),
+    ],
+
+    'whatsapp' => [
+        'enabled' => (bool) env('WHATSAPP_ENABLED', false),
+        'token' => env('WHATSAPP_TOKEN'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'review_template' => env('WHATSAPP_REVIEW_TEMPLATE', 'review_request'),
+        'language' => env('WHATSAPP_LANGUAGE', 'fr'),
+        'api_version' => env('WHATSAPP_API_VERSION', 'v21.0'),
+    ],
+
+    'exchange_rates' => [
+        'url' => env('EXCHANGE_RATES_URL', 'https://open.er-api.com/v6/latest/USD'),
+    ],
+
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),

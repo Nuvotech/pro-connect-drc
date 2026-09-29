@@ -1,39 +1,36 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import MaterialSymbol from '@/components/directory/material-symbol';
 import { useQuoteRequest } from '@/components/directory/quote-request/quote-request-provider';
 import StarRating from '@/components/directory/star-rating';
-import { findCategory, findProfessional } from '@/lib/directory-data';
-import { search } from '@/routes';
+import { useCategories } from '@/hooks/use-categories';
+import { useCurrency } from '@/hooks/use-currency';
+import type { Professional as ProfessionalData } from '@/types';
+import { t } from '@/lib/i18n';
+
+type PublicReview = {
+    id: number;
+    author: string;
+    rating: number;
+    comment: string | null;
+    reply: string | null;
+    date: string | null;
+};
+
+const rateUnitSuffixes = { hour: '/hr', day: '/day', job: '/job' };
 
 const cardClassName =
     'rounded-xl border border-outline-variant bg-surface-container-lowest shadow-[0_2px_8px_rgba(0,0,0,0.05)]';
 
-export default function Professional({ slug }: { slug: string }) {
-    const professional = findProfessional(slug);
+export default function Professional({
+    professional,
+    reviews,
+}: {
+    professional: ProfessionalData;
+    reviews: PublicReview[];
+}) {
     const { openQuoteRequest } = useQuoteRequest();
-
-    if (!professional) {
-        return (
-            <>
-                <Head title="Professional not found" />
-                <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-16 text-center">
-                    <MaterialSymbol
-                        name="person_off"
-                        className="text-5xl text-outline"
-                    />
-                    <h1 className="text-headline-lg text-on-surface">
-                        Professional not found
-                    </h1>
-                    <Link
-                        href={search()}
-                        className="rounded-lg bg-primary px-6 py-2 text-label-md text-on-primary"
-                    >
-                        Search professionals
-                    </Link>
-                </div>
-            </>
-        );
-    }
+    const { findCategory } = useCategories();
+    const { formatPrice } = useCurrency();
 
     const category = findCategory(professional.categorySlug);
     const firstName = professional.name.split(' ')[0];
@@ -41,8 +38,11 @@ export default function Professional({ slug }: { slug: string }) {
         {
             icon: 'work_history',
             label: 'Experience',
-            value: `${professional.experienceYears} Yrs`,
-            isLarge: true,
+            value:
+                professional.experienceYears > 0
+                    ? `${professional.experienceYears} ${professional.experienceYears === 1 ? 'year' : 'years'}`
+                    : 'Not stated',
+            isLarge: professional.experienceYears > 0,
         },
         {
             icon: 'map',
@@ -51,18 +51,28 @@ export default function Professional({ slug }: { slug: string }) {
             isLarge: false,
         },
         {
-            icon: 'event_available',
-            label: 'Availability',
-            value: 'Accepting Clients',
+            icon: 'verified_user',
+            label: 'Checked by ProConnect',
+            value: 'ID & registration',
             isLarge: false,
         },
         {
             icon: 'payments',
             label: 'Starting Rate',
-            value: professional.startingRate,
+            value:
+                professional.startingRateAmount === null
+                    ? 'On request'
+                    : formatPrice(
+                          professional.startingRateAmount,
+                          professional.startingRateCurrency,
+                          professional.rateUnit
+                              ? rateUnitSuffixes[professional.rateUnit]
+                              : '',
+                      ),
             isLarge: true,
         },
     ];
+    const whatsAppUrl = `https://wa.me/${professional.phone.replace(/\D/g, '')}`;
 
     return (
         <>
@@ -95,7 +105,9 @@ export default function Professional({ slug }: { slug: string }) {
                                         {professional.name}
                                     </h1>
                                     {professional.isVerified && (
-                                        <span title="Verified Professional">
+                                        <span
+                                            title={t('Verified Professional')}
+                                        >
                                             <MaterialSymbol
                                                 name="verified"
                                                 filled
@@ -112,16 +124,27 @@ export default function Professional({ slug }: { slug: string }) {
                                     {professional.title}
                                 </p>
                                 <div className="mt-3 flex flex-wrap items-center gap-4">
-                                    <div className="flex items-center gap-1">
-                                        <StarRating
-                                            rating={professional.rating}
-                                            starClassName="text-sm"
-                                        />
-                                        <span className="ml-1 text-label-sm text-on-surface-variant">
-                                            ({professional.rating.toFixed(1)} -{' '}
-                                            {professional.reviewsCount} Reviews)
+                                    {professional.reviewsCount > 0 ? (
+                                        <div className="flex items-center gap-1">
+                                            <StarRating
+                                                rating={professional.rating}
+                                                starClassName="text-sm"
+                                            />
+                                            <span className="ml-1 text-label-sm text-on-surface-variant">
+                                                (
+                                                {professional.rating.toFixed(1)}{' '}
+                                                · {professional.reviewsCount}{' '}
+                                                {professional.reviewsCount === 1
+                                                    ? t('review')
+                                                    : t('reviews')}
+                                                )
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-label-sm text-primary">
+                                            {t('New on ProConnect')}
                                         </span>
-                                    </div>
+                                    )}
                                     <div className="flex items-center gap-1 text-label-sm text-on-surface-variant">
                                         <MaterialSymbol
                                             name="location_on"
@@ -146,7 +169,7 @@ export default function Professional({ slug }: { slug: string }) {
                                     className="mb-2 text-2xl text-primary"
                                 />
                                 <span className="text-label-sm tracking-wider text-on-surface-variant uppercase">
-                                    {item.label}
+                                    {t(item.label)}
                                 </span>
                                 <span
                                     className={
@@ -167,7 +190,7 @@ export default function Professional({ slug }: { slug: string }) {
                                 name="person"
                                 className="text-primary"
                             />
-                            About {firstName}
+                            {t('About')} {firstName}
                         </h2>
                         <div className="space-y-4 text-body-md text-on-surface-variant">
                             {professional.about.map((paragraph) => (
@@ -183,7 +206,7 @@ export default function Professional({ slug }: { slug: string }) {
                                     name="gallery_thumbnail"
                                     className="text-primary"
                                 />
-                                Recent Projects
+                                {t('Recent Projects')}
                             </h2>
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                 {professional.projects.map((project, index) => (
@@ -197,11 +220,12 @@ export default function Professional({ slug }: { slug: string }) {
                                         <img
                                             src={project}
                                             alt={`Project ${index + 1}`}
+                                            loading="lazy"
                                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                         />
                                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                                             <span className="text-label-md font-semibold text-white">
-                                                View Details
+                                                {t('View Details')}
                                             </span>
                                         </div>
                                     </a>
@@ -209,13 +233,64 @@ export default function Professional({ slug }: { slug: string }) {
                             </div>
                         </section>
                     )}
+
+                    <section className={`${cardClassName} p-6`}>
+                        <h2 className="mb-4 flex items-center gap-2 text-headline-md font-bold text-on-surface">
+                            <MaterialSymbol
+                                name="reviews"
+                                className="text-primary"
+                            />
+                            {t('Client Reviews')}
+                        </h2>
+                        {reviews.length === 0 ? (
+                            <p className="text-body-md text-on-surface-variant">
+                                {t(
+                                    'No reviews yet. Reviews come from clients who hired',
+                                )}{' '}
+                                {firstName} {t('through ProConnect.')}
+                            </p>
+                        ) : (
+                            <ul className="divide-y divide-outline-variant">
+                                {reviews.map((review) => (
+                                    <li
+                                        key={review.id}
+                                        className="flex flex-col gap-2 py-4 first:pt-0 last:pb-0"
+                                    >
+                                        <div className="flex flex-wrap items-center justify-between gap-2">
+                                            <span className="text-label-md text-on-surface">
+                                                {review.author}
+                                            </span>
+                                            <span className="text-label-sm text-on-surface-variant">
+                                                {review.date}
+                                            </span>
+                                        </div>
+                                        <StarRating rating={review.rating} />
+                                        {review.comment && (
+                                            <p className="text-body-md text-on-surface-variant">
+                                                {review.comment}
+                                            </p>
+                                        )}
+                                        {review.reply && (
+                                            <p className="ml-4 border-l-2 border-outline-variant pl-3 text-label-sm text-on-surface-variant">
+                                                <span className="font-semibold text-on-surface">
+                                                    {t('Reply from')}{' '}
+                                                    {firstName}:
+                                                </span>{' '}
+                                                {review.reply}
+                                            </p>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </section>
                 </div>
 
                 <div className="relative md:col-span-4">
                     <div className="sticky top-[100px] flex flex-col gap-6">
                         <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
                             <h3 className="mb-4 text-headline-md font-bold text-on-surface">
-                                Contact {firstName}
+                                {t('Contact')} {firstName}
                             </h3>
                             <button
                                 type="button"
@@ -225,21 +300,36 @@ export default function Professional({ slug }: { slug: string }) {
                                 className="mb-3 flex w-full items-center justify-center gap-2 rounded-lg bg-secondary-container px-4 py-3 text-label-md text-on-secondary-container transition-colors hover:bg-secondary-fixed-dim"
                             >
                                 <MaterialSymbol name="request_quote" />
-                                Request a Free Quote
+                                {t('Request a Free Quote')}
                             </button>
                             <a
                                 href={`tel:${professional.phone}`}
                                 className="mb-3 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-label-md text-on-primary transition-colors hover:bg-primary-container"
                             >
                                 <MaterialSymbol name="call" />
-                                Call Directly
+                                {t('Call Directly')}
                             </a>
+                            {professional.isOnWhatsApp && (
+                                <a
+                                    href={whatsAppUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="mb-3 flex w-full items-center justify-center gap-2 rounded-lg border border-primary px-4 py-3 text-label-md text-primary transition-colors hover:bg-surface-container-low"
+                                >
+                                    <MaterialSymbol name="chat" />
+                                    {t('WhatsApp')}
+                                </a>
+                            )}
                             <div className="mt-4 flex items-center gap-2 border-t border-outline-variant pt-4 text-sm text-on-surface-variant">
                                 <MaterialSymbol
-                                    name="security"
+                                    name="verified_user"
                                     className="text-sm text-primary"
                                 />
-                                <span>Payments secured by ProConnect</span>
+                                <span>
+                                    {t(
+                                        'Verified by ProConnect: ID and registration checked',
+                                    )}
+                                </span>
                             </div>
                         </div>
 
@@ -249,17 +339,14 @@ export default function Professional({ slug }: { slug: string }) {
                                 className="mb-2 text-3xl text-secondary-container"
                             />
                             <h4 className="mb-2 text-label-md font-bold text-on-surface">
-                                Worked with {firstName}?
+                                {t('Worked with')} {firstName}?
                             </h4>
-                            <p className="mb-4 text-label-sm text-on-surface-variant">
-                                Help the community by sharing your experience.
+                            <p className="text-label-sm text-on-surface-variant">
+                                {t('Book')} {firstName}{' '}
+                                {t(
+                                    'through ProConnect and you can review the job once it is done.',
+                                )}
                             </p>
-                            <button
-                                type="button"
-                                className="w-full rounded-lg border border-primary bg-surface-container-lowest px-4 py-2 text-label-md text-primary transition-colors hover:bg-surface-bright"
-                            >
-                                Leave a Review
-                            </button>
                         </div>
                     </div>
                 </div>

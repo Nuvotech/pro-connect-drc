@@ -1,31 +1,39 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { Toaster } from '@/components/ui/sonner';
+import TranslationScope from '@/components/translation-scope';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
-import AppLayout from '@/layouts/app-layout';
+import AdminLayout from '@/layouts/admin-layout';
 import AuthLayout from '@/layouts/auth-layout';
+import ProLayout from '@/layouts/pro-layout';
 import PublicFocusLayout from '@/layouts/public-focus-layout';
 import PublicLayout from '@/layouts/public-layout';
+import RoleLayout from '@/layouts/role-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'ProConnect RDC';
 
 void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
-            case name === 'welcome':
-                return null;
-            case name === 'public/service-request':
-                return PublicFocusLayout;
-            case name.startsWith('public/'):
-                return PublicLayout;
+            case name === 'public/service-request' ||
+                name === 'public/become-a-pro' ||
+                name === 'public/review' ||
+                name === 'account/register':
+                return [TranslationScope, PublicFocusLayout];
+            case name.startsWith('public/') || name.startsWith('account/'):
+                return [TranslationScope, PublicLayout];
+            case name.startsWith('admin/'):
+                return [TranslationScope, AdminLayout];
+            case name === 'dashboard' || name.startsWith('dashboard/'):
+                return [TranslationScope, ProLayout];
             case name.startsWith('auth/'):
-                return AuthLayout;
+                return [TranslationScope, AuthLayout];
             case name.startsWith('settings/'):
-                return [AppLayout, SettingsLayout];
+                return [TranslationScope, RoleLayout, SettingsLayout];
             default:
-                return AppLayout;
+                return [TranslationScope, PublicLayout];
         }
     },
     strictMode: true,

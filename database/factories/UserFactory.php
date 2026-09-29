@@ -18,7 +18,8 @@ class UserFactory extends Factory
     protected static ?string $password;
 
     /**
-     * Define the model's default state.
+     * Define the model's default state: a pro who is already approved to
+     * use the dashboard.
      *
      * @return array<string, mixed>
      */
@@ -33,7 +34,52 @@ class UserFactory extends Factory
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
+            'pro_approved_at' => now(),
         ];
+    }
+
+    /**
+     * Indicate that the user administers the platform.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_ADMIN,
+            'pro_approved_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the pro has been approved to use the dashboard.
+     */
+    public function approvedPro(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_PRO,
+            'pro_approved_at' => now(),
+        ]);
+    }
+
+    /**
+     * Indicate that the pro applied but has not been approved yet.
+     */
+    public function unapprovedPro(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_PRO,
+            'pro_approved_at' => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a customer.
+     */
+    public function customer(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_CUSTOMER,
+            'pro_approved_at' => null,
+        ]);
     }
 
     /**

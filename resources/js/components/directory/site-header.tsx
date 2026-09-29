@@ -2,10 +2,26 @@ import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import MaterialSymbol from '@/components/directory/material-symbol';
+import RateChecker from '@/components/directory/rate-checker';
+import TownSwitcher from '@/components/directory/town-switcher';
+import LanguageSwitch from '@/components/language-switch';
 import { useActiveSection } from '@/hooks/use-active-section';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
-import { becomeAPro, dashboard, home, login, search } from '@/routes';
+import {
+    becomeAPro,
+    contact,
+    dashboard,
+    home,
+    login,
+    logout,
+    search,
+} from '@/routes';
+import { index as accountIndex } from '@/routes/account';
+import { applications as adminApplications } from '@/routes/admin';
+import { index as categoriesIndex } from '@/routes/categories';
+import { index as vehiclesIndex } from '@/routes/vehicles';
+import { t } from '@/lib/i18n';
 
 type NavLink = {
     title: string;
@@ -17,12 +33,11 @@ export default function SiteHeader() {
     const { auth } = usePage().props;
     const { currentUrl, isCurrentUrl } = useCurrentUrl();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [language, setLanguage] = useState<'fr' | 'en'>('en');
     const [searchTerm, setSearchTerm] = useState('');
 
     const isHomePage = isCurrentUrl(home());
     const activeHomeSection = useActiveSection(
-        ['categories', 'business-services', 'how-it-works'],
+        ['categories', 'business-services', 'vehicle-rental'],
         isHomePage,
     );
     const isBrowsingCategories = isHomePage
@@ -31,8 +46,10 @@ export default function SiteHeader() {
         : currentUrl.startsWith('/categories') ||
           currentUrl.startsWith('/pros') ||
           isCurrentUrl(search());
-    const isViewingHowItWorks =
-        isHomePage && activeHomeSection === 'how-it-works';
+    const isBrowsingVehicles = isHomePage
+        ? activeHomeSection === 'vehicle-rental'
+        : currentUrl.startsWith('/vehicles') ||
+          currentUrl.startsWith('/fleets');
 
     const navLinks: NavLink[] = [
         {
@@ -42,18 +59,23 @@ export default function SiteHeader() {
         },
         {
             title: 'Categories',
-            href: `${home.url()}#categories`,
+            href: categoriesIndex.url(),
             isActive: isBrowsingCategories,
         },
         {
-            title: 'How it Works',
-            href: `${home.url()}#how-it-works`,
-            isActive: isViewingHowItWorks,
+            title: 'Vehicle rental',
+            href: vehiclesIndex.url(),
+            isActive: isBrowsingVehicles,
         },
         {
             title: 'Become a Pro',
             href: becomeAPro.url(),
             isActive: isCurrentUrl(becomeAPro()),
+        },
+        {
+            title: 'Contact us',
+            href: contact.url(),
+            isActive: isCurrentUrl(contact()),
         },
     ];
 
@@ -65,19 +87,26 @@ export default function SiteHeader() {
 
     return (
         <nav className="sticky top-0 z-50 w-full border-b border-outline-variant bg-surface shadow-sm">
-            <div className="flex items-center justify-between px-page py-4">
+            <div className="flex items-center justify-between gap-3 border-b border-outline-variant/60 px-page py-1">
+                <TownSwitcher />
+                <div className="flex items-center gap-3">
+                    <RateChecker />
+                    <LanguageSwitch />
+                </div>
+            </div>
+            <div className="flex items-center justify-between px-page py-3">
                 <div className="flex items-center gap-6">
                     <Link href={home()} className="flex shrink-0 items-center">
                         <img
                             src="/images/logos/proconnect-landscape.png"
-                            alt="ProConnect RDC"
+                            alt={t('ProConnect RDC')}
                             className="h-8 w-auto md:h-10"
                         />
                     </Link>
                     <div className="ml-10 hidden items-center gap-6 lg:flex">
                         {navLinks.map((navLink) => (
                             <Link
-                                key={navLink.title}
+                                key={t(navLink.title)}
                                 href={navLink.href}
                                 className={cn(
                                     'text-label-md transition-colors duration-200 hover:text-primary',
@@ -86,7 +115,7 @@ export default function SiteHeader() {
                                         : 'font-medium text-on-surface-variant',
                                 )}
                             >
-                                {navLink.title}
+                                {t(navLink.title)}
                             </Link>
                         ))}
                     </div>
@@ -107,49 +136,51 @@ export default function SiteHeader() {
                             onChange={(event) =>
                                 setSearchTerm(event.target.value)
                             }
-                            placeholder="Search..."
-                            aria-label="Search professionals"
+                            placeholder={t('Search...')}
+                            aria-label={t('Search professionals')}
                             className="ml-2 w-40 border-none bg-transparent text-body-md text-on-surface outline-none placeholder:text-outline lg:w-48"
                         />
                     </form>
-                    <button
-                        type="button"
-                        onClick={() =>
-                            setLanguage(language === 'en' ? 'fr' : 'en')
-                        }
-                        className="text-label-md font-semibold text-on-surface-variant transition-colors hover:text-primary"
-                        aria-label="Switch language"
-                    >
-                        <span
-                            className={cn(
-                                language === 'fr' &&
-                                    'border-b border-primary text-primary',
-                            )}
+                    {auth.user?.role === 'customer' ? (
+                        <>
+                            <Link
+                                href={accountIndex()}
+                                className="inline-flex h-11 items-center rounded-lg bg-primary px-5 text-label-md text-on-primary transition-opacity hover:opacity-90"
+                            >
+                                {t('My account')}
+                            </Link>
+                            <Link
+                                href={logout()}
+                                as="button"
+                                className="hidden h-11 cursor-pointer items-center rounded-lg border border-outline-variant px-5 text-label-md text-on-surface-variant transition-colors hover:border-primary hover:text-primary sm:inline-flex"
+                            >
+                                {t('Log out')}
+                            </Link>
+                        </>
+                    ) : (
+                        <Link
+                            href={
+                                auth.user
+                                    ? auth.user.role === 'admin'
+                                        ? adminApplications()
+                                        : dashboard()
+                                    : login()
+                            }
+                            className="inline-flex h-11 items-center rounded-lg bg-primary px-6 text-label-md text-on-primary transition-opacity hover:opacity-90"
                         >
-                            FR
-                        </span>{' '}
-                        |{' '}
-                        <span
-                            className={cn(
-                                language === 'en' &&
-                                    'border-b border-primary text-primary',
-                            )}
-                        >
-                            EN
-                        </span>
-                    </button>
-                    <Link
-                        href={auth.user ? dashboard() : login()}
-                        className="rounded-lg bg-primary px-6 py-2 text-label-md text-on-primary transition-opacity hover:opacity-90"
-                    >
-                        {auth.user ? 'Dashboard' : 'Login'}
-                    </Link>
+                            {auth.user
+                                ? auth.user.role === 'admin'
+                                    ? t('Admin')
+                                    : t('Dashboard')
+                                : t('Login')}
+                        </Link>
+                    )}
                     <button
                         type="button"
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="flex items-center text-on-surface-variant hover:text-primary lg:hidden"
+                        className="flex size-11 cursor-pointer items-center justify-center rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-primary lg:hidden"
                         aria-expanded={isMenuOpen}
-                        aria-label="Toggle navigation"
+                        aria-label={t('Toggle navigation')}
                     >
                         <MaterialSymbol name={isMenuOpen ? 'close' : 'menu'} />
                     </button>
@@ -172,14 +203,14 @@ export default function SiteHeader() {
                             onChange={(event) =>
                                 setSearchTerm(event.target.value)
                             }
-                            placeholder="Search..."
-                            aria-label="Search professionals"
+                            placeholder={t('Search...')}
+                            aria-label={t('Search professionals')}
                             className="ml-2 w-full border-none bg-transparent text-body-md text-on-surface outline-none placeholder:text-outline"
                         />
                     </form>
                     {navLinks.map((navLink) => (
                         <Link
-                            key={navLink.title}
+                            key={t(navLink.title)}
                             href={navLink.href}
                             onClick={() => setIsMenuOpen(false)}
                             className={cn(
@@ -189,9 +220,18 @@ export default function SiteHeader() {
                                     : 'font-medium text-on-surface-variant',
                             )}
                         >
-                            {navLink.title}
+                            {t(navLink.title)}
                         </Link>
                     ))}
+                    {auth.user?.role === 'customer' && (
+                        <Link
+                            href={logout()}
+                            as="button"
+                            className="cursor-pointer rounded-lg px-4 py-2 text-left text-label-md font-medium text-on-surface-variant transition-colors hover:bg-surface-container-low sm:hidden"
+                        >
+                            {t('Log out')}
+                        </Link>
+                    )}
                 </div>
             )}
         </nav>

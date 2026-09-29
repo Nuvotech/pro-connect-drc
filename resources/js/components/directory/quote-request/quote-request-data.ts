@@ -1,3 +1,6 @@
+import type { City } from '@/types';
+import { t } from '@/lib/i18n';
+
 export type QuotePhoto = {
     id: string;
     file: File;
@@ -42,73 +45,58 @@ export const maxPhotos = 3;
 export const maxPhotoBytes = 10 * 1024 * 1024;
 
 export const serviceTypes = [
-    {
-        value: 'emergency',
-        icon: 'build',
-        label: 'Dépannage Urgent',
-        caption: 'Emergency Repair',
-    },
-    {
-        value: 'installation',
-        icon: 'add_circle',
-        label: 'Nouvelle Installation',
-        caption: 'New Installation',
-    },
-    {
-        value: 'renovation',
-        icon: 'home_repair_service',
-        label: 'Rénovation',
-        caption: 'Renovation',
-    },
+    { value: 'emergency', icon: 'build', label: 'Emergency repair' },
+    { value: 'installation', icon: 'add_circle', label: 'New installation' },
+    { value: 'renovation', icon: 'home_repair_service', label: 'Renovation' },
     {
         value: 'maintenance',
         icon: 'published_with_changes',
         label: 'Maintenance',
-        caption: 'Inspection Check',
     },
 ];
 
 export const timings = [
-    { value: 'urgent', icon: null, label: 'Urgent (24h)' },
-    { value: '48h', icon: 'timer', label: 'Sous 48 heures' },
-    { value: 'week', icon: 'date_range', label: 'Cette semaine' },
-    { value: 'flexible', icon: 'event_upcoming', label: 'Flexible (2-4 sem.)' },
+    { value: 'urgent', label: 'Within 24h' },
+    { value: '48h', label: 'Within 48h' },
+    { value: 'week', label: 'This week' },
+    { value: 'flexible', label: 'Flexible' },
+];
+
+export const assessments = [
+    {
+        value: 'in_person',
+        icon: 'home_repair_service',
+        label: 'Site visit',
+        hint: 'A pro visits to take measurements before quoting.',
+    },
+    {
+        value: 'remote',
+        icon: 'photo_library',
+        label: 'Photos & description',
+        hint: 'Pros quote from your description and photos.',
+    },
 ];
 
 export const contactChannels = [
     { value: 'whatsapp', icon: 'chat', label: 'WhatsApp' },
-    { value: 'call', icon: 'call', label: 'Phone Call' },
+    { value: 'call', icon: 'call', label: 'Call' },
     { value: 'email', icon: 'alternate_email', label: 'Email' },
 ];
 
-export const quoteSteps = [
-    { label: 'Category', labelFr: 'Métier', icon: 'category' },
-    {
-        label: 'Project Details',
-        labelFr: 'Détails du Projet',
-        icon: 'assignment',
-    },
-    {
-        label: 'Location & Site Visit',
-        labelFr: 'Localisation',
-        icon: 'location_on',
-    },
-    {
-        label: 'Contact & Compare Quotes',
-        labelFr: 'Coordonnées',
-        icon: 'contact_phone',
-    },
-];
+export const quoteSteps = ['Service', 'Details', 'Location', 'Contact'];
 
-export function emptyQuoteRequest(categorySlug = ''): QuoteRequestData {
+export function emptyQuoteRequest(
+    categorySlug = '',
+    city?: City | null,
+): QuoteRequestData {
     return {
         categorySlug,
         serviceType: 'emergency',
         description: '',
         timing: 'urgent',
         photos: [],
-        city: 'Kinshasa',
-        commune: 'Gombe',
+        city: city?.name ?? 'Kinshasa',
+        commune: city ? (city.communes[0] ?? '') : 'Gombe',
         address: '',
         assessment: 'in_person',
         fullName: '',
@@ -128,23 +116,28 @@ export function validateQuoteStep(
     const errors: QuoteRequestErrors = {};
 
     if (step === 0 && !data.categorySlug) {
-        errors.categorySlug =
-            'Please choose a service category / Choisissez un métier.';
+        errors.categorySlug = 'Please choose a service.';
     }
 
     if (step === 1) {
         const descriptionLength = data.description.trim().length;
 
         if (descriptionLength < descriptionMinLength) {
-            errors.description = `Please describe your project in at least ${descriptionMinLength} characters.`;
+            errors.description = t(
+                'Please describe your project in at least :descriptionMinLength characters.',
+                { descriptionMinLength },
+            );
         } else if (descriptionLength > descriptionMaxLength) {
-            errors.description = `Please keep your description under ${descriptionMaxLength} characters.`;
+            errors.description = t(
+                'Please keep your description under :descriptionMaxLength characters.',
+                { descriptionMaxLength },
+            );
         }
     }
 
     if (step === 2) {
         if (!data.city) {
-            errors.city = 'Please choose a city / Choisissez une ville.';
+            errors.city = 'Please choose a city.';
         }
 
         if (!data.commune) {
@@ -161,7 +154,12 @@ export function validateQuoteStep(
             errors.phone = 'Please enter a valid 9-digit phone number.';
         }
 
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
+        const email = data.email.trim();
+
+        if (data.contactChannel === 'email' && !email) {
+            errors.email =
+                'Enter your email address, or choose WhatsApp or a phone call.';
+        } else if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             errors.email = 'Please enter a valid email address.';
         }
     }

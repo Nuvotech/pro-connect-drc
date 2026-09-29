@@ -8,8 +8,15 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+    /* Figtree for headings, labels, buttons and navigation. */
     --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Figtree', 'Roboto', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+
+    /* Roboto supports it for running text: paragraphs, quotes, text areas. */
+    --font-body:
+        'Roboto', 'Figtree', ui-sans-serif, system-ui, sans-serif,
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
 
@@ -71,10 +78,6 @@
  */
 @theme {
     --container-page: 1140px;
-
-    --font-inter:
-        'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
     --color-outline: #707974;
     --color-outline-variant: #bfc9c3;
@@ -227,6 +230,13 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    p,
+    blockquote,
+    dd,
+    textarea {
+        font-family: var(--font-body);
+    }
 }
 
 /*
@@ -255,7 +265,7 @@
 @layer base {
     .proconnect {
         color-scheme: light;
-        font-family: var(--font-inter);
+        font-family: var(--font-sans);
         color: var(--color-on-surface);
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
@@ -296,4 +306,22 @@
             'GRAD' 0,
             'opsz' 24;
     }
+}
+
+/*
+ * Endless vertical scroll for the home hero's service cards. Each column
+ * holds its list twice, so moving it up by half loops without a jump.
+ */
+@keyframes marquee-up {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-50%);
+    }
+}
+
+@utility animate-marquee-up {
+    animation: marquee-up linear infinite;
 }

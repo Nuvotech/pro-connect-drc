@@ -1,9 +1,10 @@
 import { Link } from '@inertiajs/react';
 import MaterialSymbol from '@/components/directory/material-symbol';
 import { useQuoteRequest } from '@/components/directory/quote-request/quote-request-provider';
-import { findCategory } from '@/lib/directory-data';
 import { show as showProfessional } from '@/routes/professionals';
 import type { Professional } from '@/types';
+import { useCategories } from '@/hooks/use-categories';
+import { t } from '@/lib/i18n';
 
 type ProfessionalCardProps = {
     professional: Professional;
@@ -14,6 +15,7 @@ export default function ProfessionalCard({
     professional,
     actionLabel = 'Contact',
 }: ProfessionalCardProps) {
+    const { findCategory } = useCategories();
     const { openQuoteRequest } = useQuoteRequest();
     const category = findCategory(professional.categorySlug);
 
@@ -24,6 +26,7 @@ export default function ProfessionalCard({
                     <img
                         src={professional.photo}
                         alt={professional.name}
+                        loading="lazy"
                         className="h-full w-full object-cover"
                     />
                 </div>
@@ -50,16 +53,30 @@ export default function ProfessionalCard({
                         </span>
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-1">
-                        <MaterialSymbol
-                            name="star"
-                            filled
-                            className="text-[16px] text-secondary-container"
-                        />
-                        <span className="text-label-sm font-bold text-on-surface">
-                            {professional.rating.toFixed(1)}
-                        </span>
+                        {professional.reviewsCount > 0 ? (
+                            <>
+                                <MaterialSymbol
+                                    name="star"
+                                    filled
+                                    className="text-[16px] text-secondary-container"
+                                />
+                                <span className="text-label-sm font-bold text-on-surface">
+                                    {professional.rating.toFixed(1)}
+                                </span>
+                                <span className="text-label-sm text-on-surface-variant">
+                                    ({professional.reviewsCount}{' '}
+                                    {professional.reviewsCount === 1
+                                        ? t('review')
+                                        : t('reviews')}
+                                    ) •
+                                </span>
+                            </>
+                        ) : (
+                            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-label-sm text-primary">
+                                {t('New on ProConnect')}
+                            </span>
+                        )}
                         <span className="text-label-sm text-on-surface-variant">
-                            ({professional.reviewsCount} reviews) •{' '}
                             {professional.commune}, {professional.city}
                         </span>
                     </div>
@@ -85,7 +102,7 @@ export default function ProfessionalCard({
                     href={showProfessional(professional.slug)}
                     className="flex-1 rounded-lg border border-primary bg-surface-container-lowest py-2 text-center text-label-md text-primary transition-colors hover:bg-surface-container-low"
                 >
-                    View Profile
+                    {t('View Profile')}
                 </Link>
                 <button
                     type="button"

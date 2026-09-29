@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Professional;
+use App\Models\VehicleProvider;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        Relation::enforceMorphMap([
+            'professional' => Professional::class,
+            'vehicle_provider' => VehicleProvider::class,
+        ]);
     }
 
     /**
