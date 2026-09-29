@@ -1,17 +1,18 @@
 import { Form, Head } from '@inertiajs/react';
-import InputError from '@/components/input-error';
-import PasswordInput from '@/components/password-input';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
-import { store } from '@/routes/login';
-import { request } from '@/routes/password';
+import {
+    AuthField,
+    AuthInput,
+    AuthLink,
+    AuthPasswordInput,
+    AuthStatus,
+    AuthSubmit,
+} from '@/components/auth/auth-form';
 import PasskeyVerify from '@/components/passkey-verify';
 import { t } from '@/lib/i18n';
+import { becomeAPro } from '@/routes';
+import { register as registerAccount } from '@/routes/account';
+import { store } from '@/routes/login';
+import { request } from '@/routes/password';
 
 type Props = {
     status?: string;
@@ -23,102 +24,96 @@ export default function Login({ status, canResetPassword }: Props) {
         <>
             <Head title={t('Log in')} />
 
+            <AuthStatus>{status}</AuthStatus>
+
             <PasskeyVerify />
 
             <Form
                 {...store.form()}
                 resetOnSuccess={['password']}
-                className="flex flex-col gap-6"
+                className="flex flex-col gap-5"
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">
-                                    {t('Email address')}
-                                </Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    required
-                                    autoFocus
-                                    tabIndex={1}
-                                    autoComplete="email"
-                                    placeholder={t('email@example.com')}
-                                />
-                                <InputError message={errors.email} />
-                            </div>
+                        <AuthField
+                            id="email"
+                            label={t('Email address')}
+                            error={errors.email}
+                        >
+                            <AuthInput
+                                id="email"
+                                type="email"
+                                name="email"
+                                required
+                                autoFocus
+                                autoComplete="email"
+                                placeholder={t('you@example.com')}
+                                aria-invalid={Boolean(errors.email)}
+                            />
+                        </AuthField>
 
-                            <div className="grid gap-2">
-                                <div className="flex items-center">
-                                    <Label htmlFor="password">
-                                        {t('Password')}
-                                    </Label>
-                                    {canResetPassword && (
-                                        <TextLink
-                                            href={request()}
-                                            className="ml-auto text-sm"
-                                            tabIndex={5}
-                                        >
-                                            {t('Forgot your password?')}
-                                        </TextLink>
-                                    )}
-                                </div>
-                                <PasswordInput
-                                    id="password"
-                                    name="password"
-                                    required
-                                    tabIndex={2}
-                                    autoComplete="current-password"
-                                    placeholder={t('Password')}
-                                />
-                                <InputError message={errors.password} />
-                            </div>
+                        <AuthField
+                            id="password"
+                            label={t('Password')}
+                            error={errors.password}
+                            aside={
+                                canResetPassword && (
+                                    <AuthLink
+                                        href={request()}
+                                        className="text-label-sm font-medium"
+                                    >
+                                        {t('Forgot password?')}
+                                    </AuthLink>
+                                )
+                            }
+                        >
+                            <AuthPasswordInput
+                                id="password"
+                                name="password"
+                                required
+                                autoComplete="current-password"
+                                aria-invalid={Boolean(errors.password)}
+                            />
+                        </AuthField>
 
-                            <div className="flex items-center space-x-3">
-                                <Checkbox
-                                    id="remember"
-                                    name="remember"
-                                    tabIndex={3}
-                                />
-                                <Label htmlFor="remember">
-                                    {t('Remember me')}
-                                </Label>
-                            </div>
+                        <label className="flex cursor-pointer items-center gap-2.5 text-label-md text-on-surface">
+                            <input
+                                type="checkbox"
+                                name="remember"
+                                className="size-4 cursor-pointer rounded accent-primary"
+                            />
+                            {t('Remember me')}
+                        </label>
 
-                            <Button
-                                type="submit"
-                                className="mt-4 w-full"
-                                tabIndex={4}
-                                disabled={processing}
-                                data-test="login-button"
-                            >
-                                {processing && <Spinner />}
-                                {t('Log in')}
-                            </Button>
-                        </div>
-
-                        <div className="text-center text-sm text-muted-foreground">
-                            {t("Don't have an account?")}{' '}
-                            <TextLink href={register()} tabIndex={5}>
-                                {t('Sign up')}
-                            </TextLink>
-                        </div>
+                        <AuthSubmit
+                            processing={processing}
+                            data-test="login-button"
+                        >
+                            {t('Log in')}
+                        </AuthSubmit>
                     </>
                 )}
             </Form>
 
-            {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
+            <div className="mt-6 flex flex-col gap-1.5 border-t border-outline-variant pt-5 text-center text-label-md text-on-surface-variant">
+                <p>
+                    {t('New to ProConnect?')}{' '}
+                    <AuthLink href={registerAccount()}>
+                        {t('Create an account')}
+                    </AuthLink>
+                </p>
+                <p>
+                    {t('Offer a service or rent out vehicles?')}{' '}
+                    <AuthLink href={becomeAPro()}>
+                        {t('Join as a pro')}
+                    </AuthLink>
+                </p>
+            </div>
         </>
     );
 }
 
 Login.layout = {
-    title: 'Log in to your account',
-    description: 'Enter your email and password below to log in',
+    title: 'Welcome back',
+    description: 'Log in to your ProConnect account.',
 };

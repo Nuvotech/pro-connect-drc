@@ -96,7 +96,7 @@ class VehicleProviderController extends Controller
                 $saveVehicle->create($provider, $vehicleData);
             }
 
-            if ($request->boolean('is_verified')) {
+            if ($request->boolean('is_verified') && $request->user()->isAdmin()) {
                 $provider->recordDecision($request->user(), 'approve', notify: false);
             } else {
                 $provider->submitForReview();
@@ -107,6 +107,12 @@ class VehicleProviderController extends Controller
 
         if ($provider->email) {
             $linkProAccount($provider, $provider->email, $provider->contact_name);
+        }
+
+        if ($request->user()->isCapturer()) {
+            Inertia::flash('toast', ['type' => 'success', 'message' => __(':name was sent for review.', ['name' => $provider->business_name ?? $provider->contact_name])]);
+
+            return to_route('captures.index');
         }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __(':name has been onboarded with :count vehicles.', [

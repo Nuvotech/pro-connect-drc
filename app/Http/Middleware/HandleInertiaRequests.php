@@ -55,7 +55,7 @@ class HandleInertiaRequests extends Middleware
                 ->as('translations-'.app()->getLocale().'-'.$this->translationsVersion()),
             'auth' => [
                 'user' => $request->user(),
-                'pro' => fn () => $request->user() && ! $request->user()->isAdmin() && ! $request->user()->isCustomer()
+                'pro' => fn () => $request->user() && ! $request->user()->isAdmin() && ! $request->user()->isCustomer() && ! $request->user()->isCapturer()
                     ? $request->user()->proSummary()
                     : null,
             ],

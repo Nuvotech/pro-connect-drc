@@ -1,16 +1,16 @@
 import { Form, Head } from '@inertiajs/react';
-import InputError from '@/components/input-error';
-import PasswordInput from '@/components/password-input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import { store } from '@/routes/password/confirm';
 import {
     index as confirmOptions,
     store as confirmStore,
 } from '@/actions/Laravel/Passkeys/Http/Controllers/PasskeyConfirmationController';
+import {
+    AuthField,
+    AuthPasswordInput,
+    AuthSubmit,
+} from '@/components/auth/auth-form';
 import PasskeyVerify from '@/components/passkey-verify';
 import { t } from '@/lib/i18n';
+import { store } from '@/routes/password/confirm';
 
 export default function ConfirmPassword() {
     return (
@@ -23,37 +23,38 @@ export default function ConfirmPassword() {
                     submit: confirmStore(),
                 }}
                 label={t('Confirm with passkey')}
-                loadingLabel="Confirming..."
-                separator="Or confirm with password"
+                loadingLabel={t('Confirming…')}
+                separator={t('Or confirm with your password')}
             />
 
-            <Form {...store.form()} resetOnSuccess={['password']}>
+            <Form
+                {...store.form()}
+                resetOnSuccess={['password']}
+                className="flex flex-col gap-5"
+            >
                 {({ processing, errors }) => (
-                    <div className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">{t('Password')}</Label>
-                            <PasswordInput
+                    <>
+                        <AuthField
+                            id="password"
+                            label={t('Password')}
+                            error={errors.password}
+                        >
+                            <AuthPasswordInput
                                 id="password"
                                 name="password"
-                                placeholder={t('Password')}
                                 autoComplete="current-password"
                                 autoFocus
+                                aria-invalid={Boolean(errors.password)}
                             />
+                        </AuthField>
 
-                            <InputError message={errors.password} />
-                        </div>
-
-                        <div className="flex items-center">
-                            <Button
-                                className="w-full"
-                                disabled={processing}
-                                data-test="confirm-password-button"
-                            >
-                                {processing && <Spinner />}
-                                {t('Confirm password')}
-                            </Button>
-                        </div>
-                    </div>
+                        <AuthSubmit
+                            processing={processing}
+                            data-test="confirm-password-button"
+                        >
+                            {t('Confirm password')}
+                        </AuthSubmit>
+                    </>
                 )}
             </Form>
         </>
@@ -61,7 +62,7 @@ export default function ConfirmPassword() {
 }
 
 ConfirmPassword.layout = {
-    title: 'Confirm password',
+    title: 'Confirm your password',
     description:
         'This is a secure area of the application. Please confirm your password before continuing.',
 };

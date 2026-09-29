@@ -130,7 +130,7 @@ class ProfessionalController extends Controller
         $professional->save();
         $professional->syncCategories($request->validated('categories'));
 
-        if ($request->boolean('is_verified')) {
+        if ($request->boolean('is_verified') && $request->user()->isAdmin()) {
             $professional->recordDecision($request->user(), 'approve', notify: false);
         } else {
             $professional->submitForReview();
@@ -138,6 +138,12 @@ class ProfessionalController extends Controller
 
         if ($professional->email) {
             $linkProAccount($professional, $professional->email, $professional->full_name);
+        }
+
+        if ($request->user()->isCapturer()) {
+            Inertia::flash('toast', ['type' => 'success', 'message' => __(':name was sent for review.', ['name' => $professional->full_name])]);
+
+            return to_route('captures.index');
         }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __(':name has been onboarded.', ['name' => $professional->full_name])]);

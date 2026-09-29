@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Middleware\EnsureProIsApproved;
+use App\Http\Middleware\EnsureUserCanCapture;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\LogOutDeactivatedUsers;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -23,10 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
             'approved-pro' => EnsureProIsApproved::class,
+            'capturer' => EnsureUserCanCapture::class,
         ]);
 
         $middleware->web(append: [
             HandleAppearance::class,
+            LogOutDeactivatedUsers::class,
             SetLocale::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,

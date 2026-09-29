@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
 import AdminLayout from '@/layouts/admin-layout';
+import CapturerLayout from '@/layouts/capturer-layout';
 import ProLayout from '@/layouts/pro-layout';
 
 /**
@@ -9,6 +10,10 @@ import ProLayout from '@/layouts/pro-layout';
  */
 export default function RoleLayout({ children }: { children: ReactNode }) {
     const { auth } = usePage().props;
+
+    if (auth.user?.role === 'capturer') {
+        return <CapturerLayout>{children}</CapturerLayout>;
+    }
 
     return auth.user?.role === 'admin' ? (
         <AdminLayout>{children}</AdminLayout>

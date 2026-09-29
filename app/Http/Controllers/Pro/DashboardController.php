@@ -28,6 +28,10 @@ class DashboardController extends Controller
             return to_route('home');
         }
 
+        if ($user->isCapturer()) {
+            return to_route('captures.index');
+        }
+
         if (! $user->isApprovedPro()) {
             return Inertia::render('dashboard', [
                 'application' => $this->applicationStatus($user->proApplication),

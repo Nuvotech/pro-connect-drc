@@ -98,7 +98,7 @@ export default function SiteHeader() {
                 <div className="flex items-center gap-6">
                     <Link href={home()} className="flex shrink-0 items-center">
                         <img
-                            src="/images/logos/proconnect-landscape.png"
+                            src="/images/logos/proconnect.png"
                             alt={t('ProConnect RDC')}
                             className="h-8 w-auto md:h-10"
                         />

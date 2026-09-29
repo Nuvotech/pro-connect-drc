@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ApplicationController;
 use App\Http\Controllers\Admin\ApplicationDecisionController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\CustomerRequestController;
 use App\Http\Controllers\Admin\ExchangeRateController;
@@ -9,8 +10,13 @@ use App\Http\Controllers\Admin\ListingDocumentController;
 use App\Http\Controllers\Admin\ProApplicationController;
 use App\Http\Controllers\Admin\ProfessionalController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
+use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\Admin\VehicleProviderController;
 use App\Http\Controllers\Auth\ProRegistrationController;
+use App\Http\Controllers\Capture\CapturedFleetController;
+use App\Http\Controllers\Capture\CapturedProfessionalController;
+use App\Http\Controllers\Capture\CapturedVehicleController;
+use App\Http\Controllers\CaptureController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CustomerAccountController;
 use App\Http\Controllers\DirectoryController;
@@ -126,7 +132,45 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 });
 
+// Capturers (and admins) add professionals and fleets for review.
+Route::middleware(['auth', 'verified', 'capturer'])->group(function () {
+    Route::get('captures', [CaptureController::class, 'index'])->name('captures.index');
+
+    Route::prefix('captures')->name('captures.')->group(function () {
+        Route::get('professionals/{professional}', [CapturedProfessionalController::class, 'show'])->name('professionals.show');
+        Route::put('professionals/{professional}', [CapturedProfessionalController::class, 'update'])->name('professionals.update');
+
+        Route::get('fleets/{vehicleProvider}', [CapturedFleetController::class, 'show'])->name('fleets.show');
+        Route::put('fleets/{vehicleProvider}', [CapturedFleetController::class, 'update'])->name('fleets.update');
+        Route::get('fleets/{vehicleProvider}/vehicles/create', [CapturedVehicleController::class, 'create'])->name('vehicles.create');
+        Route::post('fleets/{vehicleProvider}/vehicles', [CapturedVehicleController::class, 'store'])->name('vehicles.store');
+        Route::get('vehicles/{vehicle}/edit', [CapturedVehicleController::class, 'edit'])->name('vehicles.edit');
+        Route::put('vehicles/{vehicle}', [CapturedVehicleController::class, 'update'])->name('vehicles.update');
+        Route::delete('vehicles/{vehicle}', [CapturedVehicleController::class, 'destroy'])->name('vehicles.destroy');
+    });
+
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('professionals/create', [ProfessionalController::class, 'create'])->name('professionals.create');
+        Route::post('professionals', [ProfessionalController::class, 'store'])->name('professionals.store');
+        Route::get('vehicle-providers/create', [VehicleProviderController::class, 'create'])->name('vehicle-providers.create');
+        Route::post('vehicle-providers', [VehicleProviderController::class, 'store'])->name('vehicle-providers.store');
+    });
+});
+
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('categories')->name('categories.')->controller(AdminCategoryController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::put('{category}', 'update')->name('update');
+        Route::patch('{category}/visibility', 'toggle')->name('toggle');
+    });
+
+    Route::prefix('team')->name('team.')->controller(TeamController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::patch('{user}', 'update')->name('update');
+    });
+
     Route::controller(CustomerRequestController::class)->group(function () {
         Route::get('requests', 'index')->name('requests.index');
         Route::post('quote-requests/{quoteRequest}/invitations', 'invite')->name('quote-requests.invite');
@@ -171,15 +215,11 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 
     Route::prefix('professionals')->name('professionals.')->controller(ProfessionalController::class)->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::get('create', 'create')->name('create');
-        Route::post('/', 'store')->name('store');
         Route::get('{professional:id}', 'show')->whereNumber('professional')->name('show');
     });
 
     Route::prefix('vehicle-providers')->name('vehicle-providers.')->controller(VehicleProviderController::class)->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::get('create', 'create')->name('create');
-        Route::post('/', 'store')->name('store');
         Route::get('{vehicleProvider}', 'show')->name('show');
     });
 });

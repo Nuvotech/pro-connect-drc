@@ -23,6 +23,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $role
  * @property string|null $locale
  * @property Carbon|null $pro_approved_at
+ * @property Carbon|null $deactivated_at
  * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $two_factor_secret
@@ -55,6 +56,11 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public const ROLE_CUSTOMER = 'customer';
 
     /**
+     * Staff who only add professionals and fleets for review.
+     */
+    public const ROLE_CAPTURER = 'capturer';
+
+    /**
      * The language emails and notifications are sent in: the one the user
      * chose, or the app default.
      */
@@ -77,6 +83,22 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
     public function isCustomer(): bool
     {
         return $this->role === self::ROLE_CUSTOMER;
+    }
+
+    /**
+     * Determine whether the user is staff who only captures listings.
+     */
+    public function isCapturer(): bool
+    {
+        return $this->role === self::ROLE_CAPTURER;
+    }
+
+    /**
+     * Determine whether the account may still sign in.
+     */
+    public function isActive(): bool
+    {
+        return $this->deactivated_at === null;
     }
 
     /**
@@ -192,6 +214,7 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
             'pro_approved_at' => 'datetime',
+            'deactivated_at' => 'datetime',
         ];
     }
 }

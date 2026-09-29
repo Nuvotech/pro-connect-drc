@@ -6,20 +6,25 @@ import {
     FileCheck2,
     Mail,
     Settings,
+    Tags,
     Star,
     Truck,
     UserPlus,
+    UsersRound,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { WorkspaceNavGroup } from '@/components/workspace/workspace-sidebar';
+import CapturerLayout from '@/layouts/capturer-layout';
 import WorkspaceLayout from '@/layouts/workspace-layout';
 import { applications } from '@/routes/admin';
 import { edit as editExchangeRate } from '@/routes/admin/exchange-rate';
 import { index as messagesIndex } from '@/routes/admin/messages';
 import { index as reviewsIndex } from '@/routes/admin/reviews';
 import { index as professionalsIndex } from '@/routes/admin/professionals';
+import { index as categoriesIndex } from '@/routes/admin/categories';
 import { index as requestsIndex } from '@/routes/admin/requests';
 import { index as signUpsIndex } from '@/routes/admin/sign-ups';
+import { index as teamIndex } from '@/routes/admin/team';
 import { index as vehicleProvidersIndex } from '@/routes/admin/vehicle-providers';
 import { edit as editProfile } from '@/routes/profile';
 import { t } from '@/lib/i18n';
@@ -68,6 +73,11 @@ function adminNavGroups(
                     matchesChildren: true,
                 },
                 {
+                    title: 'Services & categories',
+                    icon: Tags,
+                    href: categoriesIndex.url(),
+                },
+                {
                     title: 'Fleet & vehicles',
                     icon: Truck,
                     href: vehicleProvidersIndex.url(),
@@ -103,6 +113,11 @@ function adminNavGroups(
             title: 'System',
             items: [
                 {
+                    title: 'Team',
+                    icon: UsersRound,
+                    href: teamIndex.url(),
+                },
+                {
                     title: 'Settings',
                     icon: Settings,
                     href: editProfile.url(),
@@ -115,12 +130,17 @@ function adminNavGroups(
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
     const {
+        auth,
         reviewQueueCount,
         signUpQueueCount,
         requestQueueCount,
         pendingReviewCount,
         unreadMessageCount,
     } = usePage().props;
+
+    if (auth.user?.role === 'capturer') {
+        return <CapturerLayout>{children}</CapturerLayout>;
+    }
 
     return (
         <WorkspaceLayout

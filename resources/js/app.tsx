@@ -5,6 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { initializeTheme } from '@/hooks/use-appearance';
 import AdminLayout from '@/layouts/admin-layout';
 import AuthLayout from '@/layouts/auth-layout';
+import CapturerLayout from '@/layouts/capturer-layout';
 import ProLayout from '@/layouts/pro-layout';
 import PublicFocusLayout from '@/layouts/public-focus-layout';
 import PublicLayout from '@/layouts/public-layout';
@@ -24,6 +25,8 @@ void createInertiaApp({
                 return [TranslationScope, PublicFocusLayout];
             case name.startsWith('public/') || name.startsWith('account/'):
                 return [TranslationScope, PublicLayout];
+            case name.startsWith('captures/'):
+                return [TranslationScope, CapturerLayout];
             case name.startsWith('admin/'):
                 return [TranslationScope, AdminLayout];
             case name === 'dashboard' || name.startsWith('dashboard/'):

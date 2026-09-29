@@ -1,11 +1,15 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, usePage, Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import ProfessionalController from '@/actions/App/Http/Controllers/Admin/ProfessionalController';
 import ProfessionalFields from '@/components/workspace/professional-fields';
 import { index as professionalsIndex } from '@/routes/admin/professionals';
+import { index as capturesIndex } from '@/routes/captures';
 import { t } from '@/lib/i18n';
 
 export default function CreateProfessional() {
+    const isCapturer = usePage().props.auth.user?.role === 'capturer';
+    const backHref = isCapturer ? capturesIndex() : professionalsIndex();
+
     return (
         <>
             <Head title={t('Onboard professional')} />
@@ -13,11 +17,11 @@ export default function CreateProfessional() {
             <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8 md:px-8">
                 <div>
                     <Link
-                        href={professionalsIndex()}
+                        href={backHref}
                         className="mb-4 inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors duration-200 hover:text-zinc-900"
                     >
                         <ArrowLeft className="size-4" aria-hidden="true" />
-                        {t('Professionals')}
+                        {isCapturer ? t('My captures') : t('Professionals')}
                     </Link>
                     <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
                         {t('Onboard a professional')}
@@ -38,7 +42,7 @@ export default function CreateProfessional() {
                         <>
                             <ProfessionalFields
                                 errors={errors}
-                                showVerifiedToggle
+                                showVerifiedToggle={!isCapturer}
                             />
 
                             <div className="flex items-center justify-end gap-2">
@@ -48,7 +52,7 @@ export default function CreateProfessional() {
                                     </span>
                                 )}
                                 <Link
-                                    href={professionalsIndex()}
+                                    href={backHref}
                                     className="inline-flex h-10 items-center rounded-lg px-4 text-sm font-medium text-zinc-600 transition-colors duration-200 hover:bg-zinc-100 hover:text-zinc-900"
                                 >
                                     {t('Cancel')}

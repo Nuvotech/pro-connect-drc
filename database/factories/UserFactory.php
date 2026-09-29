@@ -72,7 +72,28 @@ class UserFactory extends Factory
     }
 
     /**
-     * Indicate that the user is a customer.
+     * Staff who only capture professionals and fleets.
+     */
+    public function capturer(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_CAPTURER,
+            'pro_approved_at' => null,
+        ]);
+    }
+
+    /**
+     * An account an admin has switched off.
+     */
+    public function deactivated(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'deactivated_at' => now(),
+        ]);
+    }
+
+    /**
+     * A customer account.
      */
     public function customer(): static
     {

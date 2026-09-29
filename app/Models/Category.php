@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * A directory category: a trade, a business service, or a vehicle type.
@@ -69,6 +70,48 @@ class Category extends Model
         self::GROUP_BUSINESS => 'Business services',
         self::GROUP_VEHICLE => 'Vehicle & equipment rental',
     ];
+
+    /**
+     * Icons admins can pick for a category (Material Symbols names).
+     *
+     * @var list<string>
+     */
+    public const ICONS = [
+        'handyman', 'plumbing', 'electrical_services', 'carpenter', 'format_paint', 'roofing',
+        'construction', 'hardware', 'build', 'solar_power', 'ac_unit', 'water_drop',
+        'cleaning_services', 'local_laundry_service', 'yard', 'pest_control', 'content_cut', 'checkroom',
+        'car_repair', 'two_wheeler', 'phone_iphone', 'computer', 'router', 'videocam',
+        'restaurant', 'cake', 'celebration', 'photo_camera', 'school', 'medical_services',
+        'gavel', 'account_balance', 'calculate', 'business_center', 'translate', 'security',
+        'local_shipping', 'directions_car', 'airport_shuttle', 'directions_bus', 'agriculture', 'precision_manufacturing',
+    ];
+
+    /**
+     * Add an active category at the end of its group, with a unique slug.
+     */
+    public static function createInGroup(string $group, string $name, ?string $nameFr = null, ?string $icon = null, ?string $summary = null, ?string $description = null): self
+    {
+        $baseSlug = Str::slug($name) ?: 'service';
+        $slug = $baseSlug;
+        $suffix = 2;
+
+        while (static::where('slug', $slug)->exists()) {
+            $slug = "{$baseSlug}-{$suffix}";
+            $suffix++;
+        }
+
+        return static::create([
+            'group' => $group,
+            'slug' => $slug,
+            'name' => $name,
+            'name_fr' => filled($nameFr) ? $nameFr : $name,
+            'icon' => $icon ?? ($group === self::GROUP_VEHICLE ? 'local_shipping' : 'handyman'),
+            'summary' => $summary,
+            'description' => $description,
+            'sort_order' => (int) static::query()->inGroup($group)->max('sort_order') + 1,
+            'is_active' => true,
+        ]);
+    }
 
     /**
      * Get the attributes that should be cast.

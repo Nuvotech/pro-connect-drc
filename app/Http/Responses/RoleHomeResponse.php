@@ -32,6 +32,12 @@ class RoleHomeResponse implements LoginResponse, RegisterResponse, TwoFactorLogi
             return redirect()->intended(route('admin.applications'));
         }
 
+        if ($user?->isCapturer()) {
+            $request->session()->forget('url.intended');
+
+            return redirect()->route('captures.index');
+        }
+
         $intended = $request->session()->pull('url.intended');
 
         if ($intended && ! str_starts_with(parse_url($intended, PHP_URL_PATH) ?? '', '/admin')) {

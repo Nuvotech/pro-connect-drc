@@ -1,72 +1,62 @@
-// Components
 import { Form, Head } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+    AuthField,
+    AuthInput,
+    AuthLink,
+    AuthStatus,
+    AuthSubmit,
+} from '@/components/auth/auth-form';
+import { t } from '@/lib/i18n';
 import { login } from '@/routes';
 import { email } from '@/routes/password';
-import { t } from '@/lib/i18n';
 
 export default function ForgotPassword({ status }: { status?: string }) {
     return (
         <>
             <Head title={t('Forgot password')} />
 
-            {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
+            <AuthStatus>{status}</AuthStatus>
 
-            <div className="space-y-6">
-                <Form {...email.form()}>
-                    {({ processing, errors }) => (
-                        <>
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">
-                                    {t('Email address')}
-                                </Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    autoComplete="off"
-                                    autoFocus
-                                    placeholder={t('email@example.com')}
-                                />
+            <Form {...email.form()} className="flex flex-col gap-5">
+                {({ processing, errors }) => (
+                    <>
+                        <AuthField
+                            id="email"
+                            label={t('Email address')}
+                            error={errors.email}
+                        >
+                            <AuthInput
+                                id="email"
+                                type="email"
+                                name="email"
+                                required
+                                autoFocus
+                                autoComplete="email"
+                                placeholder={t('you@example.com')}
+                                aria-invalid={Boolean(errors.email)}
+                            />
+                        </AuthField>
 
-                                <InputError message={errors.email} />
-                            </div>
+                        <AuthSubmit
+                            processing={processing}
+                            data-test="email-password-reset-link-button"
+                        >
+                            {t('Email password reset link')}
+                        </AuthSubmit>
+                    </>
+                )}
+            </Form>
 
-                            <div className="my-6 flex items-center justify-start">
-                                <Button
-                                    className="w-full"
-                                    disabled={processing}
-                                    data-test="email-password-reset-link-button"
-                                >
-                                    {processing && (
-                                        <LoaderCircle className="h-4 w-4 animate-spin" />
-                                    )}
-                                    {t('Email password reset link')}
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </Form>
-
-                <div className="space-x-1 text-center text-sm text-muted-foreground">
-                    <span>{t('Or, return to')}</span>
-                    <TextLink href={login()}>{t('log in')}</TextLink>
-                </div>
-            </div>
+            <p className="mt-6 border-t border-outline-variant pt-5 text-center text-label-md text-on-surface-variant">
+                {t('Remembered it?')}{' '}
+                <AuthLink href={login()}>{t('Back to log in')}</AuthLink>
+            </p>
         </>
     );
 }
 
 ForgotPassword.layout = {
-    title: 'Forgot password',
-    description: 'Enter your email to receive a password reset link',
+    title: 'Forgot your password?',
+    description:
+        'Enter your email and we will send you a link to choose a new one.',
 };
