@@ -79,6 +79,22 @@ export default function SiteHeader() {
         },
     ];
 
+    const isCustomer = auth.user?.role === 'customer';
+    const accountHref = auth.user
+        ? auth.user.role === 'customer'
+            ? accountIndex()
+            : auth.user.role === 'admin'
+              ? adminApplications()
+              : dashboard()
+        : login();
+    const accountLabel = auth.user
+        ? auth.user.role === 'customer'
+            ? t('My account')
+            : auth.user.role === 'admin'
+              ? t('Admin')
+              : t('Dashboard')
+        : t('Login');
+
     function submitSearch(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
@@ -87,8 +103,10 @@ export default function SiteHeader() {
 
     return (
         <nav className="sticky top-0 z-50 w-full border-b border-outline-variant bg-surface shadow-sm">
-            <div className="flex items-center justify-between gap-3 border-b border-outline-variant/60 px-page py-1">
-                <TownSwitcher />
+            <div className="flex items-center justify-end gap-3 border-b border-outline-variant/60 px-page py-1 sm:justify-between">
+                <div className="hidden sm:block">
+                    <TownSwitcher />
+                </div>
                 <div className="flex items-center gap-3">
                     <RateChecker />
                     <LanguageSwitch />
@@ -141,38 +159,22 @@ export default function SiteHeader() {
                             className="ml-2 w-40 border-none bg-transparent text-body-md text-on-surface outline-none placeholder:text-outline lg:w-48"
                         />
                     </form>
-                    {auth.user?.role === 'customer' ? (
-                        <>
-                            <Link
-                                href={accountIndex()}
-                                className="inline-flex h-11 items-center rounded-lg bg-primary px-5 text-label-md text-on-primary transition-opacity hover:opacity-90"
-                            >
-                                {t('My account')}
-                            </Link>
-                            <Link
-                                href={logout()}
-                                as="button"
-                                className="hidden h-11 cursor-pointer items-center rounded-lg border border-outline-variant px-5 text-label-md text-on-surface-variant transition-colors hover:border-primary hover:text-primary sm:inline-flex"
-                            >
-                                {t('Log out')}
-                            </Link>
-                        </>
-                    ) : (
+                    <Link
+                        href={accountHref}
+                        className={cn(
+                            'hidden h-11 items-center rounded-lg bg-primary text-label-md text-on-primary transition-opacity hover:opacity-90 sm:inline-flex',
+                            isCustomer ? 'px-5' : 'px-6',
+                        )}
+                    >
+                        {accountLabel}
+                    </Link>
+                    {isCustomer && (
                         <Link
-                            href={
-                                auth.user
-                                    ? auth.user.role === 'admin'
-                                        ? adminApplications()
-                                        : dashboard()
-                                    : login()
-                            }
-                            className="inline-flex h-11 items-center rounded-lg bg-primary px-6 text-label-md text-on-primary transition-opacity hover:opacity-90"
+                            href={logout()}
+                            as="button"
+                            className="hidden h-11 cursor-pointer items-center rounded-lg border border-outline-variant px-5 text-label-md text-on-surface-variant transition-colors hover:border-primary hover:text-primary sm:inline-flex"
                         >
-                            {auth.user
-                                ? auth.user.role === 'admin'
-                                    ? t('Admin')
-                                    : t('Dashboard')
-                                : t('Login')}
+                            {t('Log out')}
                         </Link>
                     )}
                     <button
@@ -223,7 +225,16 @@ export default function SiteHeader() {
                             {t(navLink.title)}
                         </Link>
                     ))}
-                    {auth.user?.role === 'customer' && (
+                    <div className="mt-2 flex flex-col gap-2 border-t border-outline-variant pt-4 sm:hidden">
+                        <Link
+                            href={accountHref}
+                            onClick={() => setIsMenuOpen(false)}
+                            className="inline-flex h-11 items-center justify-center rounded-lg bg-primary px-5 text-label-md text-on-primary transition-opacity hover:opacity-90"
+                        >
+                            {accountLabel}
+                        </Link>
+                    </div>
+                    {isCustomer && (
                         <Link
                             href={logout()}
                             as="button"

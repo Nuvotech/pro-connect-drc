@@ -102,7 +102,7 @@ function Converter({ rateText }: { rateText: string }) {
             >
                 <MaterialSymbol
                     name="currency_exchange"
-                    className="text-[18px] text-primary"
+                    className="hidden text-[18px] text-primary sm:inline-block"
                 />
                 {rateText}
             </DialogPrimitive.Trigger>

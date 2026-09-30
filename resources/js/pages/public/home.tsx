@@ -1,67 +1,67 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
-import type { FormEvent } from 'react';
-import MaterialSymbol from '@/components/directory/material-symbol';
-import { useQuoteRequest } from '@/components/directory/quote-request/quote-request-provider';
-import ServiceMarquee from '@/components/directory/service-marquee';
-import StarRating from '@/components/directory/star-rating';
-import { useCities } from '@/hooks/use-categories';
-import { useVisitorLocation } from '@/hooks/use-visitor-location';
-import { search, serviceRequest } from '@/routes';
+import { Head, Link, router } from "@inertiajs/react";
+import { useState } from "react";
+import type { FormEvent } from "react";
+import MaterialSymbol from "@/components/directory/material-symbol";
+import { useQuoteRequest } from "@/components/directory/quote-request/quote-request-provider";
+import ServiceMarquee from "@/components/directory/service-marquee";
+import StarRating from "@/components/directory/star-rating";
+import { useCities } from "@/hooks/use-categories";
+import { useVisitorLocation } from "@/hooks/use-visitor-location";
+import { search, serviceRequest } from "@/routes";
 import {
     index as categoriesIndex,
     show as showCategory,
-} from '@/routes/categories';
-import { show as showProfessional } from '@/routes/professionals';
-import { index as vehiclesIndex } from '@/routes/vehicles';
+} from "@/routes/categories";
+import { show as showProfessional } from "@/routes/professionals";
+import { index as vehiclesIndex } from "@/routes/vehicles";
 import type {
     BusinessCategory,
     Category,
     Professional,
     VehicleRentalCategory,
-} from '@/types';
-import { otherName, t } from '@/lib/i18n';
+} from "@/types";
+import { otherName, t } from "@/lib/i18n";
 
 const howItWorksSteps = [
     {
-        title: 'Complete Form',
-        description: 'Tell us what you need done and where.',
+        title: "Complete Form",
+        description: "Tell us what you need done and where.",
     },
     {
-        title: 'Identify Pros',
-        description: 'We match you with local, qualified professionals.',
+        title: "Identify Pros",
+        description: "We match you with local, qualified professionals.",
     },
     {
-        title: 'Assessment Visit',
-        description: 'Pros visit your site if necessary to assess the work.',
+        title: "Assessment Visit",
+        description: "Pros visit your site if necessary to assess the work.",
     },
     {
-        title: 'Compare Quotes',
-        description: 'Review estimates and choose the best fit.',
+        title: "Compare Quotes",
+        description: "Review estimates and choose the best fit.",
     },
 ];
 
 const benefits = [
     {
-        icon: 'verified',
-        title: 'Verified Pros',
+        icon: "verified",
+        title: "Verified Pros",
         description:
-            'Every professional is vetted for quality and reliability.',
+            "Every professional is vetted for quality and reliability.",
     },
     {
-        icon: 'map',
-        title: 'Local Coverage',
-        description: 'Find pros near you across major cities in the DRC.',
+        icon: "map",
+        title: "Local Coverage",
+        description: "Find pros near you across major cities in the DRC.",
     },
     {
-        icon: 'request_quote',
-        title: 'Free Quotes',
-        description: 'Get multiple estimates without any upfront costs.',
+        icon: "request_quote",
+        title: "Free Quotes",
+        description: "Get multiple estimates without any upfront costs.",
     },
     {
-        icon: 'rate_review',
-        title: 'Transparent Reviews',
-        description: 'Read genuine feedback from previous customers.',
+        icon: "rate_review",
+        title: "Transparent Reviews",
+        description: "Read genuine feedback from previous customers.",
     },
 ];
 
@@ -80,10 +80,10 @@ export default function Home({
 }) {
     const { openQuoteRequest } = useQuoteRequest();
     const { cities } = useCities();
-    const [service, setService] = useState('');
+    const [service, setService] = useState("");
     const { city: visitorCity } = useVisitorLocation();
     const [chosenLocation, setLocation] = useState<string | null>(null);
-    const location = chosenLocation ?? visitorCity?.name ?? '';
+    const location = chosenLocation ?? visitorCity?.name ?? "";
 
     function submitSearch(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -100,17 +100,17 @@ export default function Home({
 
     return (
         <>
-            <Head title={t('Find Reliable Professionals in DRC')} />
+            <Head title={t("Find Reliable Professionals in DRC")} />
 
             <section className="relative grid w-full grid-cols-1 items-center gap-10 overflow-hidden bg-surface-container-low px-page py-16 md:grid-cols-2 md:py-24">
                 <div className="relative z-10">
                     <h1 className="mb-6 text-headline-lg leading-tight text-on-background md:text-display-lg">
-                        {t('Find Reliable Professionals in')}{' '}
-                        <span className="text-primary">{t('DRC')}</span>
+                        {t("Find Reliable Professionals in")}{" "}
+                        <span className="text-primary">{t("DRC")}</span>
                     </h1>
                     <p className="mb-10 max-w-lg text-body-lg text-on-surface-variant">
                         {t(
-                            'Connect with trusted tradespeople for your home or business projects. Verified, local, and ready to help.',
+                            "Connect with trusted tradespeople for your home or business projects. Verified, local, and ready to help.",
                         )}
                     </p>
                     <form
@@ -122,7 +122,7 @@ export default function Home({
                                 htmlFor="hero-service"
                                 className="mb-1 block pl-2 text-label-sm text-on-surface-variant"
                             >
-                                {t('What do you need?')}
+                                {t("What do you need?")}
                             </label>
                             <div className="relative flex h-12 items-center rounded-lg border border-outline-variant transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
                                 <MaterialSymbol
@@ -137,7 +137,7 @@ export default function Home({
                                         setService(event.target.value)
                                     }
                                     placeholder={t(
-                                        'e.g. Plumber, Electrician...',
+                                        "e.g. Plumber, Electrician...",
                                     )}
                                     className="w-full border-none bg-transparent px-4 py-2 text-body-md outline-none"
                                 />
@@ -148,7 +148,7 @@ export default function Home({
                                 htmlFor="hero-location"
                                 className="mb-1 block pl-2 text-label-sm text-on-surface-variant"
                             >
-                                {t('Location')}
+                                {t("Location")}
                             </label>
                             <div className="relative flex h-12 items-center rounded-lg border border-outline-variant transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
                                 <MaterialSymbol
@@ -163,7 +163,7 @@ export default function Home({
                                     }
                                     className="w-full cursor-pointer appearance-none border-none bg-transparent px-4 py-2 text-body-md outline-none"
                                 >
-                                    <option value="">{t('All cities')}</option>
+                                    <option value="">{t("All cities")}</option>
                                     {cities.map((city) => (
                                         <option
                                             key={city.name}
@@ -179,7 +179,7 @@ export default function Home({
                             type="submit"
                             className="flex h-12 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-6 text-label-md text-on-primary transition-opacity hover:opacity-90"
                         >
-                            {t('Search')}
+                            {t("Search")}
                             <MaterialSymbol
                                 name="arrow_forward"
                                 className="text-sm"
@@ -195,7 +195,7 @@ export default function Home({
                     onClick={() => openQuoteRequest()}
                     className="w-full rounded-lg bg-secondary-container py-4 text-label-md font-bold text-on-secondary-container transition-all hover:brightness-105 md:hidden"
                 >
-                    {t('Get Free Quotes')}
+                    {t("Get Free Quotes")}
                 </button>
             </section>
 
@@ -205,11 +205,11 @@ export default function Home({
             >
                 <div className="mb-16 text-center">
                     <h2 className="mb-4 text-headline-lg font-bold text-on-background">
-                        {t('Browse by Category')}
+                        {t("Browse by Category")}
                     </h2>
                     <p className="mx-auto max-w-2xl text-body-lg text-on-surface-variant">
                         {t(
-                            'Explore our wide range of professional services tailored to your needs in the DRC.',
+                            "Explore our wide range of professional services tailored to your needs in the DRC.",
                         )}
                     </p>
                 </div>
@@ -234,8 +234,8 @@ export default function Home({
                             </p>
                             <p className="text-label-sm font-semibold text-primary">
                                 {category.prosCount === 0
-                                    ? t('Join as a pro')
-                                    : `${category.prosCount} verified ${category.prosCount === 1 ? 'pro' : 'pros'}`}
+                                    ? t("Join as a pro")
+                                    : `${category.prosCount} verified ${category.prosCount === 1 ? "pro" : "pros"}`}
                             </p>
                         </Link>
                     ))}
@@ -245,7 +245,7 @@ export default function Home({
                         href={categoriesIndex()}
                         className="inline-block rounded-lg border border-primary bg-surface px-10 py-4 text-label-md text-primary transition-colors hover:bg-primary hover:text-on-primary"
                     >
-                        {t('View all services')}
+                        {t("View all services")}
                     </Link>
                 </div>
             </section>
@@ -256,13 +256,11 @@ export default function Home({
             >
                 <div className="mb-16 text-center">
                     <h2 className="mb-4 text-headline-lg font-bold text-on-background">
-                        {t(
-                            'Services aux Entreprises & Professionnels / B2B & Professional Services',
-                        )}
+                        {t("B2B & Professional Services")}
                     </h2>
                     <p className="mx-auto max-w-2xl text-body-lg text-on-surface-variant">
                         {t(
-                            'Solutions spécialisées pour la croissance et la conformité de votre entreprise en RDC.',
+                            "Specialised solutions to grow your business and stay compliant in the DRC.",
                         )}
                     </p>
                 </div>
@@ -301,11 +299,11 @@ export default function Home({
             >
                 <div className="mb-12 text-center">
                     <h2 className="mb-4 text-headline-lg font-bold text-on-background">
-                        {t('Service Vehicle & Equipment Rental')}
+                        {t("Service Vehicle & Equipment Rental")}
                     </h2>
                     <p className="mx-auto max-w-2xl text-body-lg text-on-surface-variant">
                         {t(
-                            'Commercial trucks, fleet hire, passenger transport, and utility vehicles across DRC.',
+                            "Commercial trucks, fleet hire, passenger transport, and utility vehicles across DRC.",
                         )}
                     </p>
                 </div>
@@ -337,7 +335,7 @@ export default function Home({
                                         </p>
                                     </div>
                                     <span className="inline-flex items-center gap-1 text-label-sm text-on-surface-variant transition-colors duration-200 group-hover:text-primary">
-                                        {t('View vehicles')}
+                                        {t("View vehicles")}
                                         <MaterialSymbol
                                             name="arrow_forward"
                                             className="text-sm transition-transform duration-200 group-hover:translate-x-0.5"
@@ -353,7 +351,7 @@ export default function Home({
                         href={vehiclesIndex()}
                         className="inline-flex items-center gap-1.5 text-label-md font-semibold text-primary underline-offset-4 hover:underline"
                     >
-                        {t('Browse the full fleet')}
+                        {t("Browse the full fleet")}
                         <MaterialSymbol
                             name="arrow_forward"
                             className="text-base"
@@ -368,10 +366,10 @@ export default function Home({
             >
                 <div className="mb-16 text-center">
                     <h2 className="mb-4 text-headline-lg font-bold text-on-background">
-                        {t('How It Works')}
+                        {t("How It Works")}
                     </h2>
                     <p className="mx-auto max-w-2xl text-body-lg text-on-surface-variant">
-                        {t('Get your project done in 4 simple steps.')}
+                        {t("Get your project done in 4 simple steps.")}
                     </p>
                 </div>
                 <div className="relative isolate grid grid-cols-1 gap-10 md:grid-cols-4">
@@ -399,7 +397,7 @@ export default function Home({
                         onClick={() => openQuoteRequest()}
                         className="inline-flex items-center gap-2 rounded-lg bg-primary px-10 py-4 text-label-md text-on-primary shadow-sm transition-opacity hover:opacity-90"
                     >
-                        {t('Get Free Quotes')}
+                        {t("Get Free Quotes")}
                         <MaterialSymbol
                             name="arrow_forward"
                             className="text-sm"
@@ -411,10 +409,10 @@ export default function Home({
             <section className="w-full bg-background px-page py-16">
                 <div className="mb-16 text-center">
                     <h2 className="mb-4 text-headline-lg font-bold text-on-background">
-                        {t('Why Choose Us')}
+                        {t("Why Choose Us")}
                     </h2>
                     <p className="mx-auto max-w-2xl text-body-lg text-on-surface-variant">
-                        {t('We take the stress out of finding reliable help.')}
+                        {t("We take the stress out of finding reliable help.")}
                     </p>
                 </div>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -443,11 +441,11 @@ export default function Home({
                     <div className="mb-10 flex items-end justify-between">
                         <div>
                             <h2 className="mb-4 text-headline-lg font-bold text-on-background">
-                                {t('Top Rated Professionals')}
+                                {t("Top Rated Professionals")}
                             </h2>
                             <p className="max-w-2xl text-body-lg text-on-surface-variant">
                                 {t(
-                                    'Meet some of our highly recommended experts.',
+                                    "Meet some of our highly recommended experts.",
                                 )}
                             </p>
                         </div>
@@ -455,7 +453,7 @@ export default function Home({
                             href={search()}
                             className="hidden items-center gap-2 text-label-md text-primary hover:underline md:flex"
                         >
-                            {t('See All')}
+                            {t("See All")}
                             <MaterialSymbol
                                 name="arrow_forward"
                                 className="text-sm"
@@ -484,8 +482,8 @@ export default function Home({
                                 <div className="mb-4 flex items-center">
                                     <StarRating rating={professional.rating} />
                                     <span className="ml-2 text-label-sm text-on-surface-variant">
-                                        ({professional.reviewsCount}{' '}
-                                        {t('reviews)')}
+                                        ({professional.reviewsCount}{" "}
+                                        {t("reviews)")}
                                     </span>
                                 </div>
                                 <p className="line-clamp-2 text-body-md text-on-surface-variant">

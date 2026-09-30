@@ -43,9 +43,9 @@ export default function Category({
         <>
             <Head title={category.name} />
 
-            <header className="border-b border-outline-variant bg-surface-container-low px-page py-16">
-                <div className="flex flex-col items-center gap-6 md:flex-row">
-                    <div className="flex flex-shrink-0 rounded-2xl bg-primary-container p-6 text-on-primary-container shadow-sm">
+            <header className="border-b border-outline-variant bg-surface-container-low px-page py-8 md:py-16">
+                <div className="flex flex-col items-center gap-4 md:flex-row md:gap-6">
+                    <div className="hidden flex-shrink-0 rounded-2xl bg-primary-container p-6 text-on-primary-container shadow-sm md:flex">
                         <MaterialSymbol
                             name={category.icon}
                             className="text-[64px]"
@@ -72,7 +72,7 @@ export default function Category({
                 </div>
             </header>
 
-            <div className="grid w-full flex-grow grid-cols-1 items-start gap-6 px-page py-10 lg:grid-cols-12">
+            <div className="grid w-full flex-grow grid-cols-1 items-start gap-6 px-page py-6 md:py-10 lg:grid-cols-12">
                 <aside className="rounded-lg border border-outline-variant bg-surface-container-lowest p-4 shadow-[0_2px_8px_rgba(0,0,0,0.05)] lg:sticky lg:top-[100px] lg:col-span-3">
                     <h2 className="mb-4 border-b border-outline-variant pb-2 text-headline-md text-on-surface">
                         {t('Filters')}
