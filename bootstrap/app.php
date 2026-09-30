@@ -33,7 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             LogOutDeactivatedUsers::class,
             SetLocale::class,
             HandleInertiaRequests::class,
-            AddLinkHeadersForPreloadedAssets::class,
+            AddLinkHeadersForPreloadedAssets::using(20),
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
