@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vehicle_provider_id')->constrained()->cascadeOnDelete();
-            $table->string('category');
+            $table->foreignId('category_id')->nullable()->constrained()->restrictOnDelete();
             $table->string('make', 100);
             $table->string('model', 100);
             $table->unsignedSmallInteger('year');
@@ -31,10 +31,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('quantity')->default(1);
             $table->date('insurance_expires_on')->nullable();
             $table->text('notes')->nullable();
-            $table->string('photo_path')->nullable();
             $table->timestamps();
-
-            $table->index('category');
         });
     }
 

@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('summary')->nullable();
             $table->text('description')->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0);
+            $table->unsignedTinyInteger('featured_rank')->nullable();
+            $table->unsignedInteger('search_count')->default(0);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

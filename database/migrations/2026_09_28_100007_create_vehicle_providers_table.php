@@ -13,20 +13,26 @@ return new class extends Migration
     {
         Schema::create('vehicle_providers', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->unique()->constrained()->nullOnDelete();
+            $table->string('slug')->nullable()->unique();
             $table->string('contact_name');
             $table->string('business_name')->nullable();
             $table->string('phone', 20);
             $table->boolean('is_on_whatsapp')->default(false);
             $table->string('email')->nullable()->unique();
-            $table->string('city', 100);
-            $table->string('commune', 100);
+            $table->foreignId('city_id')->nullable()->constrained()->restrictOnDelete();
+            $table->foreignId('commune_id')->nullable()->constrained()->restrictOnDelete();
             $table->string('address')->nullable();
             $table->string('registry_number', 50)->nullable();
             $table->string('tax_id', 50)->nullable();
             $table->string('preferred_language', 2)->default('fr');
             $table->string('identity_document_path')->nullable();
             $table->timestamp('verified_at')->nullable();
+            $table->string('review_status', 20)->default('pending')->index();
+            $table->timestamp('submitted_at')->nullable();
             $table->foreignId('onboarded_by_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->decimal('rating_average', 2, 1)->nullable();
+            $table->unsignedInteger('reviews_count')->default(0);
             $table->timestamps();
         });
     }

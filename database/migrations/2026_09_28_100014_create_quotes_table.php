@@ -22,7 +22,9 @@ return new class extends Migration
             $table->string('estimated_duration', 100)->nullable();
             $table->timestamp('site_visit_at')->nullable();
             $table->timestamp('responded_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
             $table->timestamps();
+
             $table->unique(['quote_request_id', 'professional_id']);
         });
     }

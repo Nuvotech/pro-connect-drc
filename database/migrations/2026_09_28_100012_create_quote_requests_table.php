@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('reference', 20)->nullable()->unique();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->foreignId('category_id')->constrained()->restrictOnDelete();
+            $table->foreignId('requested_professional_id')->nullable()->constrained('professionals')->nullOnDelete();
             $table->string('service_type', 30);
             $table->text('description');
             $table->string('timing', 20);

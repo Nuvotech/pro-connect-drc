@@ -11,8 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('vehicles', function (Blueprint $table) {
-            $table->dropColumn('photo_path');
+        Schema::create('communes', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('city_id')->constrained()->cascadeOnDelete();
+            $table->string('name', 100);
+            $table->timestamps();
+
+            $table->unique(['city_id', 'name']);
         });
     }
 
@@ -21,8 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('vehicles', function (Blueprint $table) {
-            $table->string('photo_path')->nullable()->after('notes');
-        });
+        Schema::dropIfExists('communes');
     }
 };

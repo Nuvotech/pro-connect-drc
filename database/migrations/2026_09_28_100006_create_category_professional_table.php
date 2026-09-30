@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->timestamp('deactivated_at')->nullable()->after('pro_approved_at');
+        Schema::create('category_professional', function (Blueprint $table) {
+            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('professional_id')->constrained()->cascadeOnDelete();
+
+            $table->primary(['category_id', 'professional_id']);
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('deactivated_at');
-        });
+        Schema::dropIfExists('category_professional');
     }
 };
