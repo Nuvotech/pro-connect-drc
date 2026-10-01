@@ -40,6 +40,10 @@ return [
         'url' => env('EXCHANGE_RATES_URL', 'https://open.er-api.com/v6/latest/USD'),
     ],
 
+    'google_analytics' => [
+        'measurement_id' => env('GOOGLE_ANALYTICS_ID'),
+    ],
+
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
