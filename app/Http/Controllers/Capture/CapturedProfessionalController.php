@@ -10,7 +10,6 @@ use App\Models\Professional;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -41,24 +40,10 @@ class CapturedProfessionalController extends Controller
      */
     public function update(UpdateCapturedProfessionalRequest $request, Professional $professional): RedirectResponse
     {
-        $professional->fill($request->safe()->except(['photo', 'identity_document']))
+        $professional->fill($request->safe()->except(['photo', 'cover', 'identity_document', 'business_registration']))
             ->placeIn($request->validated('city'), $request->validated('commune'));
-
-        if ($request->hasFile('photo')) {
-            if ($professional->photo_path) {
-                Storage::disk('public')->delete($professional->photo_path);
-            }
-
-            $professional->photo_path = $request->file('photo')->store('professionals/photos', 'public');
-        }
-
-        if ($request->hasFile('identity_document')) {
-            if ($professional->identity_document_path) {
-                Storage::disk('local')->delete($professional->identity_document_path);
-            }
-
-            $professional->identity_document_path = $request->file('identity_document')->store('professionals/documents', 'local');
-        }
+        $professional->storeProfileImages($request);
+        $professional->storeVerificationDocuments($request);
 
         $professional->save();
         $professional->syncCategories($request->validated('categories'));

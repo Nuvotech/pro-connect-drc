@@ -78,17 +78,14 @@ class VehicleProviderController extends Controller
         $provider = DB::transaction(function () use ($request, $saveVehicle) {
             $provider = new VehicleProvider($request->safe()->except([
                 'identity_document',
+                'business_registration',
                 'is_verified',
                 'vehicles',
             ]));
 
             $provider->placeIn($request->validated('city'), $request->validated('commune'));
             $provider->onboarded_by_id = $request->user()->id;
-
-            if ($request->hasFile('identity_document')) {
-                $provider->identity_document_path = $request->file('identity_document')
-                    ->store('vehicle-providers/documents', 'local');
-            }
+            $provider->storeVerificationDocuments($request);
 
             $provider->save();
 

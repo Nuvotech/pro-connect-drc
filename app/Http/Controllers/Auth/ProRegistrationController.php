@@ -46,6 +46,7 @@ class ProRegistrationController extends Controller
             ]);
 
             $application = new ProApplication($request->safe()->only([
+                'provider_type',
                 'full_name',
                 'business_name',
                 'phone',

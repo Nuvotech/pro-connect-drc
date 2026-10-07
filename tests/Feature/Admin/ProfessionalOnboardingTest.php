@@ -129,6 +129,46 @@ test('an admin can onboard a verified professional with a photo and ID document'
     Storage::disk('public')->assertMissing($professional->identity_document_path);
 });
 
+test('a company cannot be marked as verified without its business registration', function () {
+    $this->actingAs(User::factory()->admin()->create())
+        ->post(route('admin.professionals.store'), validProfessionalPayload([
+            'provider_type' => 'company',
+            'is_verified' => '1',
+        ]))
+        ->assertSessionHasErrors(['is_verified' => 'Add the RCCM number, tax ID and business registration before verifying a company.']);
+
+    expect(Professional::count())->toBe(0);
+});
+
+test('a company can be onboarded as verified with its business registration', function () {
+    Storage::fake('local');
+
+    $this->actingAs(User::factory()->admin()->create())
+        ->post(route('admin.professionals.store'), validProfessionalPayload([
+            'provider_type' => 'company',
+            'is_verified' => '1',
+            'business_registration' => UploadedFile::fake()->create('rccm.pdf', 200, 'application/pdf'),
+        ]))
+        ->assertSessionHasNoErrors();
+
+    $professional = Professional::sole();
+
+    expect($professional)
+        ->isCompany()->toBeTrue()
+        ->isVerified()->toBeTrue();
+
+    Storage::disk('local')->assertExists($professional->business_registration_path);
+});
+
+test('a company needs a name', function () {
+    $this->actingAs(User::factory()->admin()->create())
+        ->post(route('admin.professionals.store'), validProfessionalPayload([
+            'provider_type' => 'company',
+            'business_name' => '',
+        ]))
+        ->assertSessionHasErrors(['business_name' => 'Enter the company name.']);
+});
+
 test('a professional stays unverified when the admin does not verify them', function () {
     $this->actingAs(User::factory()->admin()->create())
         ->post(route('admin.professionals.store'), Arr::except(validProfessionalPayload(), 'is_on_whatsapp'))

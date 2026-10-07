@@ -11,6 +11,7 @@ import { t } from '@/lib/i18n';
 type PublicFleet = {
     slug: string;
     name: string;
+    isCompany: boolean;
     city: string | null;
     commune: string | null;
     phone: string;
@@ -48,12 +49,25 @@ export default function Fleet({
                                 filled
                                 className="text-base"
                             />
-                            {t('Verified fleet')}
+                            {fleet.isCompany
+                                ? t('Verified company')
+                                : t('Verified fleet')}
                         </p>
                         <h1 className="mt-1 text-headline-lg text-on-surface md:text-display-lg">
                             {fleet.name}
                         </h1>
                         <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-body-md text-on-surface-variant">
+                            <span className="flex items-center gap-1">
+                                <MaterialSymbol
+                                    name={
+                                        fleet.isCompany ? 'apartment' : 'person'
+                                    }
+                                    className="text-base"
+                                />
+                                {fleet.isCompany
+                                    ? t('Registered company')
+                                    : t('Individual owner')}
+                            </span>
                             {fleet.city && (
                                 <span className="flex items-center gap-1">
                                     <MaterialSymbol

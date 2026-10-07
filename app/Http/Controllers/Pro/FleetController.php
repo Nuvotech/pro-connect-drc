@@ -14,7 +14,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -95,10 +94,10 @@ class FleetController extends Controller
         }
 
         $provider = DB::transaction(function () use ($request, $saveVehicle) {
-            $provider = new VehicleProvider($request->safe()->except(['identity_document', 'vehicles']));
+            $provider = new VehicleProvider($request->safe()->except(['identity_document', 'business_registration', 'vehicles']));
             $provider->placeIn($request->validated('city'), $request->validated('commune'));
             $provider->user()->associate($request->user());
-            $this->storeIdentityDocument($request, $provider);
+            $provider->storeVerificationDocuments($request);
             $provider->save();
 
             foreach ($request->validated('vehicles') as $vehicleData) {
@@ -144,8 +143,8 @@ class FleetController extends Controller
         abort_unless($provider, 404);
         Gate::authorize('update', $provider);
 
-        $provider->fill($request->safe()->except(['identity_document']))->placeIn($request->validated('city'), $request->validated('commune'));
-        $this->storeIdentityDocument($request, $provider);
+        $provider->fill($request->safe()->except(['identity_document', 'business_registration']))->placeIn($request->validated('city'), $request->validated('commune'));
+        $provider->storeVerificationDocuments($request);
         $needsReReview = $provider->resetVerificationIfKeyFieldsChanged();
         $provider->save();
 
@@ -158,21 +157,5 @@ class FleetController extends Controller
             : __('Details updated.')]);
 
         return to_route('dashboard.fleet.show');
-    }
-
-    /**
-     * Store a newly uploaded ID document, replacing the previous file.
-     */
-    private function storeIdentityDocument(StoreFleetRequest|UpdateFleetRequest $request, VehicleProvider $provider): void
-    {
-        if (! $request->hasFile('identity_document')) {
-            return;
-        }
-
-        if ($provider->identity_document_path) {
-            Storage::disk('local')->delete($provider->identity_document_path);
-        }
-
-        $provider->identity_document_path = $request->file('identity_document')->store('vehicle-providers/documents', 'local');
     }
 }

@@ -4,10 +4,11 @@ import { useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import CategoryCombobox from '@/components/workspace/category-combobox';
 import { Field, inputClassName } from '@/components/workspace/form-fields';
+import ProviderTypeField from '@/components/workspace/provider-type-field';
 import { cn } from '@/lib/utils';
 import { login } from '@/routes';
 import { store as registerPro } from '@/routes/become-a-pro';
-import type { CategoryOptionGroup } from '@/types';
+import type { CategoryOptionGroup, ProviderType } from '@/types';
 import { t } from '@/lib/i18n';
 
 type CityOption = {
@@ -17,6 +18,7 @@ type CityOption = {
 };
 
 type ApplicationData = {
+    providerType: ProviderType | null;
     fullName: string;
     businessName: string;
     email: string;
@@ -36,6 +38,7 @@ type ApplicationErrors = Partial<
 >;
 
 const serverFields: Record<string, keyof ApplicationErrors> = {
+    provider_type: 'providerType',
     full_name: 'fullName',
     business_name: 'businessName',
     email: 'email',
@@ -61,6 +64,7 @@ const steps = [
  * The wizard step each field lives on, so a server error jumps back to it.
  */
 const fieldSteps: Record<keyof ApplicationErrors, number> = {
+    providerType: 0,
     fullName: 0,
     businessName: 0,
     email: 0,
@@ -114,8 +118,18 @@ function validateStep(
 function validateContact(data: ApplicationData): ApplicationErrors {
     const errors: ApplicationErrors = {};
 
+    if (!data.providerType) {
+        errors.providerType = t(
+            'Choose whether you work for yourself or for a company.',
+        );
+    }
+
     if (!data.fullName.trim()) {
         errors.fullName = 'Please enter your full name.';
+    }
+
+    if (data.providerType === 'company' && !data.businessName.trim()) {
+        errors.businessName = t('Enter your company name.');
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
@@ -147,6 +161,7 @@ export default function BecomeAPro({
     maxCustomServices: number;
 }) {
     const [data, setData] = useState<ApplicationData>({
+        providerType: null,
         fullName: '',
         businessName: '',
         email: '',
@@ -207,6 +222,7 @@ export default function BecomeAPro({
         router.post(
             registerPro.url(),
             {
+                provider_type: data.providerType,
                 full_name: data.fullName,
                 business_name: data.businessName,
                 email: data.email,
@@ -283,8 +299,20 @@ export default function BecomeAPro({
                                     'How clients and our team can reach you.',
                                 )}
                             >
+                                <ProviderTypeField
+                                    variant="applicant"
+                                    value={data.providerType}
+                                    onChange={(providerType) =>
+                                        setField('providerType', providerType)
+                                    }
+                                    error={errors.providerType}
+                                />
                                 <Field
-                                    label={t('Full name')}
+                                    label={
+                                        data.providerType === 'company'
+                                            ? t('Your full name')
+                                            : t('Full name')
+                                    }
                                     htmlFor="fullName"
                                     error={errors.fullName}
                                 >
@@ -304,10 +332,14 @@ export default function BecomeAPro({
                                     />
                                 </Field>
                                 <Field
-                                    label={t('Business name')}
+                                    label={
+                                        data.providerType === 'company'
+                                            ? t('Company name')
+                                            : t('Trade name')
+                                    }
                                     htmlFor="businessName"
                                     error={errors.businessName}
-                                    isOptional
+                                    isOptional={data.providerType !== 'company'}
                                 >
                                     <input
                                         id="businessName"
@@ -319,7 +351,14 @@ export default function BecomeAPro({
                                                 event.target.value,
                                             )
                                         }
-                                        placeholder={t('Dupont Plomberie SARL')}
+                                        aria-invalid={Boolean(
+                                            errors.businessName,
+                                        )}
+                                        placeholder={
+                                            data.providerType === 'company'
+                                                ? t('Dupont Plomberie SARL')
+                                                : t("Jean's Plumbing")
+                                        }
                                         className={inputClassName}
                                     />
                                 </Field>

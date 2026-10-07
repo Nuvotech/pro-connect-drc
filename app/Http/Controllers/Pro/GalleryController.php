@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Pro;
 
+use App\Actions\StoreCompressedImage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Pro\StoreGalleryPhotosRequest;
 use App\Models\ProfessionalPhoto;
@@ -41,7 +42,7 @@ class GalleryController extends Controller
     /**
      * Add photos to the end of the gallery.
      */
-    public function store(StoreGalleryPhotosRequest $request): RedirectResponse
+    public function store(StoreGalleryPhotosRequest $request, StoreCompressedImage $storeImage): RedirectResponse
     {
         $professional = $request->user()->professional;
 
@@ -54,7 +55,7 @@ class GalleryController extends Controller
             collect($request->file('photos'))
                 ->values()
                 ->map(fn (UploadedFile $photo, int $index) => [
-                    'path' => $photo->store("professionals/{$professional->id}/gallery", 'public'),
+                    'path' => $storeImage($photo, "professionals/{$professional->id}/gallery"),
                     'position' => $nextPosition + $index,
                 ])
                 ->all(),

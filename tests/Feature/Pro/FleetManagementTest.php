@@ -112,6 +112,47 @@ test('changing the RCCM number sends the fleet back for verification', function 
     expect($provider->fresh()->isVerified())->toBeFalse();
 });
 
+test('a company fleet can be saved before its registration documents are on file', function () {
+    Storage::fake('public');
+    $pro = User::factory()->create();
+
+    $this->actingAs($pro)
+        ->post(route('dashboard.fleet.store'), [
+            ...fleetDetailsPayload(['provider_type' => 'company', 'registry_number' => null]),
+            'vehicles' => [fleetVehiclePayload()],
+        ])
+        ->assertRedirect(route('dashboard.fleet.show'));
+
+    $provider = VehicleProvider::sole();
+
+    expect($provider)
+        ->isCompany()->toBeTrue()
+        ->isVerified()->toBeFalse()
+        ->and(collect($provider->completionChecklist())->pluck('key')->all())
+        ->toBe(['vehicles', 'vehicle_photos', 'registry_number', 'tax_id', 'business_registration']);
+});
+
+test('uploading a business registration sends a verified company fleet back for verification', function () {
+    Storage::fake('local');
+    $pro = User::factory()->create();
+    $provider = VehicleProvider::factory()->company(withRegistration: true)->verified()->for($pro)->locatedIn('Kinshasa', 'Limete')->create();
+
+    $this->actingAs($pro)
+        ->patch(route('dashboard.fleet.update'), fleetDetailsPayload([
+            'provider_type' => 'company',
+            'business_name' => $provider->business_name,
+            'registry_number' => $provider->registry_number,
+            'tax_id' => $provider->tax_id,
+            'business_registration' => UploadedFile::fake()->create('rccm.pdf', 200, 'application/pdf'),
+        ]))
+        ->assertSessionHasNoErrors();
+
+    $provider->refresh();
+
+    expect($provider->isVerified())->toBeFalse();
+    Storage::disk('local')->assertExists($provider->business_registration_path);
+});
+
 test('adding a vehicle needs all six photos and sends the fleet back for verification', function () {
     Storage::fake('public');
     $pro = User::factory()->create();

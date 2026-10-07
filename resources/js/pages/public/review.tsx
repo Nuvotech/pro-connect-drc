@@ -152,7 +152,7 @@ export default function Review({
                                     className={cn(
                                         'text-[40px] transition-colors',
                                         value <= hoverRating
-                                            ? 'text-secondary-container'
+                                            ? 'text-rating'
                                             : 'text-outline-variant',
                                     )}
                                 />
@@ -229,7 +229,7 @@ function Stars({ rating }: { rating: number }) {
                     className={cn(
                         'text-[24px]',
                         value <= rating
-                            ? 'text-secondary-container'
+                            ? 'text-rating'
                             : 'text-outline-variant',
                     )}
                 />

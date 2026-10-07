@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="ProConnect profile cover">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#001537"/>
+      <stop offset="0.55" stop-color="#00285e"/>
+      <stop offset="1" stop-color="#0a3d82"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.82" cy="0.1" r="0.6">
+      <stop offset="0" stop-color="#009ca0" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#009ca0" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Interlocking diamonds and zigzags, after Kuba raffia cloth. -->
+    <pattern id="kuba" width="96" height="96" patternUnits="userSpaceOnUse">
+      <g fill="none" stroke="#afc6f7" stroke-width="2" stroke-linejoin="miter">
+        <path d="M48 6 L90 48 L48 90 L6 48 Z"/>
+        <path d="M48 24 L72 48 L48 72 L24 48 Z"/>
+        <path d="M0 0 L12 12 M96 0 L84 12 M0 96 L12 84 M96 96 L84 84"/>
+        <path d="M40 48 L48 40 L56 48 L48 56 Z" fill="#afc6f7"/>
+      </g>
+    </pattern>
+    <linearGradient id="patternFade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.35"/>
+      <stop offset="0.5" stop-color="#fff" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.4"/>
+    </linearGradient>
+    <mask id="patternMask">
+      <rect width="1600" height="400" fill="url(#patternFade)"/>
+    </mask>
+  </defs>
+
+  <rect width="1600" height="400" fill="url(#base)"/>
+  <rect width="1600" height="400" fill="url(#kuba)" mask="url(#patternMask)" opacity="0.7"/>
+  <rect width="1600" height="400" fill="url(#glow)"/>
+
+  <!-- The river: layered bands sweeping across the bottom. -->
+  <path d="M0 300 C 260 250, 520 340, 800 300 S 1340 250, 1600 290 L1600 400 L0 400 Z" fill="#00285e" opacity="0.7"/>
+  <path d="M0 340 C 300 300, 560 380, 860 340 S 1380 300, 1600 335 L1600 400 L0 400 Z" fill="#001f4a" opacity="0.85"/>
+  <path d="M0 300 C 260 250, 520 340, 800 300 S 1340 250, 1600 290" fill="none" stroke="#009ca0" stroke-width="3" opacity="0.7"/>
+  <path d="M0 318 C 260 268, 520 358, 800 318 S 1340 268, 1600 308" fill="none" stroke="#4fd5d8" stroke-width="1.5" opacity="0.35"/>
+</svg>

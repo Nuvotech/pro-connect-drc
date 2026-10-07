@@ -7,7 +7,7 @@ import MaterialSymbol from '@/components/directory/material-symbol';
 import ProfessionalCard from '@/components/directory/professional-card';
 import { cn } from '@/lib/utils';
 import { search } from '@/routes';
-import type { Category, City, Professional } from '@/types';
+import type { Category, City, Professional, ProviderType } from '@/types';
 import { useVisitorLocation } from '@/hooks/use-visitor-location';
 import { t } from '@/lib/i18n';
 
@@ -17,11 +17,18 @@ const sortOptions = [
     { value: 'newest', label: 'Newest' },
 ];
 
+const providerTypeOptions = [
+    { value: null, label: 'All' },
+    { value: 'individual', label: 'Independent professionals' },
+    { value: 'company', label: 'Registered companies' },
+] as const;
+
 type SearchFilters = {
     q: string;
     location: string;
     categories: string[];
     rating: number;
+    type: ProviderType | null;
     sort: string;
 };
 
@@ -53,7 +60,8 @@ export default function Search({
     const activeFilterCount =
         filters.categories.length +
         (filters.location ? 1 : 0) +
-        (filters.rating > 0 ? 1 : 0);
+        (filters.rating > 0 ? 1 : 0) +
+        (filters.type ? 1 : 0);
     const selectedCategories = filters.categories;
     const currentPage = professionals.current_page;
     const pageCount = professionals.last_page;
@@ -79,6 +87,7 @@ export default function Search({
                 categories:
                     next.categories.length > 0 ? next.categories : undefined,
                 rating: next.rating > 0 ? next.rating : undefined,
+                type: next.type ?? undefined,
                 sort: next.sort !== 'rating' ? next.sort : undefined,
                 page:
                     changes.page && changes.page > 1 ? changes.page : undefined,
@@ -246,6 +255,37 @@ export default function Search({
                             </div>
                         </div>
 
+                        <fieldset className="mb-6">
+                            <legend className="mb-2 text-label-md text-on-surface">
+                                {t('Provider type')}
+                            </legend>
+                            <div className="space-y-2">
+                                {providerTypeOptions.map((option) => (
+                                    <label
+                                        key={option.label}
+                                        className="flex cursor-pointer items-center gap-2"
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="provider-type"
+                                            checked={
+                                                filters.type === option.value
+                                            }
+                                            onChange={() =>
+                                                applyFilters({
+                                                    type: option.value,
+                                                })
+                                            }
+                                            className="size-4 accent-primary"
+                                        />
+                                        <span className="text-[13px] leading-5">
+                                            {t(option.label)}
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
+                        </fieldset>
+
                         <div className="mb-6">
                             <label
                                 htmlFor="search-rating"
@@ -257,7 +297,7 @@ export default function Search({
                                 <MaterialSymbol
                                     name="star"
                                     filled
-                                    className="text-secondary-container"
+                                    className="text-rating"
                                 />
                                 <input
                                     id="search-rating"

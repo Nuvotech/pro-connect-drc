@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\HasLocation;
+use App\Concerns\HasProviderType;
 use Database\Factories\ProApplicationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\DB;
  *
  * @property int $id
  * @property int $user_id
+ * @property string $provider_type
  * @property string $full_name
  * @property string|null $business_name
  * @property string $phone
@@ -32,11 +34,20 @@ use Illuminate\Support\Facades\DB;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['full_name', 'business_name', 'phone', 'is_on_whatsapp', 'description'])]
+#[Fillable(['provider_type', 'full_name', 'business_name', 'phone', 'is_on_whatsapp', 'description'])]
 class ProApplication extends Model
 {
     /** @use HasFactory<ProApplicationFactory> */
-    use HasFactory, HasLocation;
+    use HasFactory, HasLocation, HasProviderType;
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'provider_type' => self::PROVIDER_INDIVIDUAL,
+    ];
 
     public const STATUS_PENDING = 'pending';
 
@@ -142,6 +153,7 @@ class ProApplication extends Model
         $this->loadMissing(['categories', 'city', 'commune', 'user']);
 
         $shared = [
+            'provider_type' => $this->provider_type,
             'business_name' => $this->business_name,
             'phone' => $this->phone,
             'email' => $this->user->email,
@@ -153,6 +165,7 @@ class ProApplication extends Model
             'registry_number' => null,
             'tax_id' => null,
             'has_identity_document' => false,
+            'has_business_registration' => false,
         ];
 
         if ($listingType === 'vehicle_provider') {
@@ -170,6 +183,7 @@ class ProApplication extends Model
             'experience_years' => null,
             'bio' => $this->description,
             'has_photo' => false,
+            'has_cover' => false,
         ];
     }
 

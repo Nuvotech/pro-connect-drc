@@ -24,6 +24,7 @@ class ProApplicationResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'providerType' => $this->provider_type,
             'fullName' => $this->full_name,
             'businessName' => $this->business_name,
             'email' => $this->user->email,

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 /**
  * The public "Contact us" form.
@@ -47,8 +48,12 @@ class ContactController extends Controller
         $contactMessage->save();
 
         if (filled(config('services.contact.email'))) {
-            Notification::route('mail', config('services.contact.email'))
-                ->notify(new NewContactMessage($contactMessage));
+            try {
+                Notification::route('mail', config('services.contact.email'))
+                    ->notify(new NewContactMessage($contactMessage));
+            } catch (Throwable $exception) {
+                report($exception);
+            }
         }
 
         Inertia::flash('sent', true);

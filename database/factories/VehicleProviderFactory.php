@@ -55,4 +55,21 @@ class VehicleProviderFactory extends Factory
             'review_status' => 'approved',
         ]);
     }
+
+    /**
+     * Indicate that the provider is a registered company. Pass true to
+     * include the registration details and document it is verified with.
+     */
+    public function company(bool $withRegistration = false): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'provider_type' => VehicleProvider::PROVIDER_COMPANY,
+            'business_name' => fake()->company(),
+            ...($withRegistration ? [
+                'registry_number' => 'CD/KIN/RCCM/'.fake()->numerify('##-B-#####'),
+                'tax_id' => fake()->numerify('01-##-N#####'),
+                'business_registration_path' => 'vehicle-providers/documents/rccm.pdf',
+            ] : []),
+        ]);
+    }
 }

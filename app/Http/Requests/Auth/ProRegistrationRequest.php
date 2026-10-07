@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\ProApplication;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * The short "Become a pro" application: who the person is and what they
@@ -40,8 +41,9 @@ class ProRegistrationRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'provider_type' => ['required', Rule::in(ProApplication::PROVIDER_TYPES)],
             'full_name' => $this->nameRules(),
-            'business_name' => ['nullable', 'string', 'max:255'],
+            'business_name' => ['nullable', 'required_if:provider_type,'.ProApplication::PROVIDER_COMPANY, 'string', 'max:255'],
             'phone' => ['required', 'string', 'regex:/^[0-9 ]{9,20}$/'],
             'is_on_whatsapp' => ['boolean'],
             'email' => $this->emailRules(),
@@ -64,7 +66,10 @@ class ProRegistrationRequest extends FormRequest
     {
         return [
             ...$this->referenceDataMessages(),
+            'provider_type.required' => __('Choose whether you work for yourself or for a company.'),
+            'provider_type.in' => __('Choose whether you work for yourself or for a company.'),
             'full_name.required' => __('Please enter your full name.'),
+            'business_name.required_if' => __('Enter your company name.'),
             'phone.regex' => __('Enter a phone number of at least 9 digits.'),
             'email.unique' => __('An account with this email already exists. Log in instead.'),
             'categories.required_without' => __('Choose at least one service, or add your own.'),

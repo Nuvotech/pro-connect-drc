@@ -133,6 +133,26 @@ test('search filters by minimum rating and sorts by reviews', function () {
             ->where('professionals.data.0.name', 'Many Reviews'));
 });
 
+test('search filters companies and independent professionals', function () {
+    Professional::factory()->company()->verified()->create(['business_name' => 'Kongo Construction SARL']);
+    Professional::factory()->verified()->create(['business_name' => null, 'full_name' => 'Jean Dupont']);
+
+    $this->get(route('search', ['type' => 'company']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('filters.type', 'company')
+            ->where('professionals.total', 1)
+            ->where('professionals.data.0.name', 'Kongo Construction SARL')
+            ->where('professionals.data.0.isCompany', true));
+
+    $this->get(route('search', ['type' => 'individual']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('professionals.total', 1)
+            ->where('professionals.data.0.name', 'Jean Dupont'));
+
+    $this->get(route('search', ['type' => 'agency']))
+        ->assertSessionHasErrors('type');
+});
+
 test('search results are paginated', function () {
     Professional::factory()->count(12)->verified()->create();
 

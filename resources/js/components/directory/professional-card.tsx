@@ -58,7 +58,7 @@ export default function ProfessionalCard({
                                 <MaterialSymbol
                                     name="star"
                                     filled
-                                    className="text-[16px] text-secondary-container"
+                                    className="text-[16px] text-rating"
                                 />
                                 <span className="text-label-sm font-bold text-on-surface">
                                     {professional.rating.toFixed(1)}

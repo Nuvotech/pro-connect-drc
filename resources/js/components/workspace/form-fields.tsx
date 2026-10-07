@@ -34,6 +34,7 @@ export function Field({
     htmlFor,
     error,
     isOptional = false,
+    note,
     className,
     children,
 }: {
@@ -41,9 +42,13 @@ export function Field({
     htmlFor: string;
     error?: string;
     isOptional?: boolean;
+    /** Short text beside the label, shown instead of "Optional". */
+    note?: string;
     className?: string;
     children: ReactNode;
 }) {
+    const labelNote = note ?? (isOptional ? t('Optional') : undefined);
+
     return (
         <div className={cn('flex flex-col gap-1.5', className)}>
             <label
@@ -51,9 +56,9 @@ export function Field({
                 className="flex items-baseline justify-between gap-2 text-sm font-medium text-zinc-900"
             >
                 {label}
-                {isOptional && (
+                {labelNote && (
                     <span className="text-xs font-normal text-zinc-500">
-                        {t('Optional')}
+                        {labelNote}
                     </span>
                 )}
             </label>
@@ -105,6 +110,7 @@ export function FileField({
     fileName,
     onFileChange,
     error,
+    note,
 }: {
     label: string;
     name: string;
@@ -116,13 +122,15 @@ export function FileField({
     fileName?: string;
     onFileChange: (fileName?: string) => void;
     error?: string;
+    /** Short text beside the label, shown instead of "Optional". */
+    note?: string;
 }) {
     return (
         <div id={id} className="flex scroll-mt-24 flex-col gap-1.5">
             <span className="flex items-baseline justify-between gap-2 text-sm font-medium text-zinc-900">
                 {label}
                 <span className="text-xs font-normal text-zinc-500">
-                    {t('Optional')}
+                    {note ?? t('Optional')}
                 </span>
             </span>
             <label

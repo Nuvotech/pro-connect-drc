@@ -90,11 +90,13 @@ class DirectoryController extends Controller
             'categories' => ['nullable', 'array'],
             'categories.*' => ['string', 'max:100'],
             'rating' => ['nullable', 'numeric', 'min:0', 'max:5'],
+            'type' => ['nullable', Rule::in(Professional::PROVIDER_TYPES)],
             'sort' => ['nullable', Rule::in(self::SORTS)],
         ]);
 
         $place = VisitorCity::filter($request, 'location');
         $term = trim($filters['q'] ?? '');
+        $providerType = $filters['type'] ?? null;
         $categorySlugs = $filters['categories'] ?? [];
         $minimumRating = (float) ($filters['rating'] ?? 0);
         $sort = $filters['sort'] ?? 'rating';
@@ -117,6 +119,7 @@ class DirectoryController extends Controller
             ->when($place['city'] !== null, fn (Builder $query) => $query->whereRelation('city', 'name', $place['city']))
             ->when($categorySlugs !== [], fn (Builder $query) => $query->whereHas('categories', fn (Builder $categories) => $categories->whereIn('slug', $categorySlugs)))
             ->when($minimumRating > 0, fn (Builder $query) => $query->where('rating_average', '>=', $minimumRating))
+            ->when($providerType !== null, fn (Builder $query) => $query->where('provider_type', $providerType))
             ->when($sort === 'rating', fn (Builder $query) => $query->orderByRaw('rating_average is null')->orderByDesc('rating_average')->orderByDesc('reviews_count'))
             ->when($sort === 'reviews', fn (Builder $query) => $query->orderByDesc('reviews_count'))
             ->when($sort === 'newest', fn (Builder $query) => $query->latest('verified_at'))
@@ -133,6 +136,7 @@ class DirectoryController extends Controller
                 'locationIsVisitorDefault' => $place['isVisitorDefault'],
                 'categories' => $categorySlugs,
                 'rating' => $minimumRating,
+                'type' => $providerType,
                 'sort' => $sort,
             ],
             'categories' => $this->categoriesInGroup([Category::GROUP_TRADE, Category::GROUP_BUSINESS]),
@@ -309,6 +313,7 @@ class DirectoryController extends Controller
             'fleet' => [
                 'slug' => $provider->slug,
                 'name' => $provider->business_name ?? $provider->contact_name,
+                'isCompany' => $provider->isCompany(),
                 'city' => $provider->city?->name,
                 'commune' => $provider->commune?->name,
                 'phone' => '+243'.preg_replace('/\D/', '', $provider->phone),

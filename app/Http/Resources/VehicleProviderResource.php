@@ -20,6 +20,7 @@ class VehicleProviderResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'providerType' => $this->provider_type,
             'contactName' => $this->contact_name,
             'businessName' => $this->business_name,
             'phone' => $this->phone,
@@ -32,6 +33,7 @@ class VehicleProviderResource extends JsonResource
             'taxId' => $this->tax_id,
             'preferredLanguage' => $this->preferred_language,
             'hasIdentityDocument' => $this->identity_document_path !== null,
+            'hasBusinessRegistration' => $this->business_registration_path !== null,
             'isVerified' => $this->isVerified(),
             'verifiedAt' => $this->verified_at?->toDateString(),
             'onboardedBy' => $this->whenLoaded('onboardedBy', fn () => $this->onboardedBy?->name),

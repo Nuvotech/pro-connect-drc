@@ -19,7 +19,7 @@ class PublicProfessionalResource extends JsonResource
 {
     public const PLACEHOLDER_PHOTO = '/images/directory/placeholder-pro.svg';
 
-    public const DEFAULT_COVER = '/images/directory/profile-cover.jpg';
+    public const DEFAULT_COVER = '/images/directory/profile-cover.svg';
 
     /**
      * Transform the resource into an array.
@@ -44,7 +44,7 @@ class PublicProfessionalResource extends JsonResource
             'categorySlugs' => $categories->pluck('slug')->all(),
             'serviceTypes' => $categoryNames,
             'photo' => $this->photo_path ? Storage::disk('public')->url($this->photo_path) : self::PLACEHOLDER_PHOTO,
-            'cover' => self::DEFAULT_COVER,
+            'cover' => $this->cover_path ? Storage::disk('public')->url($this->cover_path) : self::DEFAULT_COVER,
             'commune' => $this->commune?->name ?? '',
             'city' => $this->city?->name ?? '',
             'rating' => (float) ($this->rating_average ?? 0),
@@ -52,6 +52,7 @@ class PublicProfessionalResource extends JsonResource
             'summary' => Str::limit($paragraphs[0] ?? implode(', ', $categoryNames), 140),
             'tags' => array_slice($categoryNames, 0, 3),
             'isVerified' => $this->isVerified(),
+            'isCompany' => $this->isCompany(),
             'experienceYears' => (int) ($this->experience_years ?? 0),
             'serviceArea' => $this->service_area ?? $this->city?->name ?? '',
             'startingRate' => $this->formattedStartingRate(),

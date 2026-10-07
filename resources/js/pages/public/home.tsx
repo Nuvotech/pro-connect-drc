@@ -106,7 +106,9 @@ export default function Home({
                 <div className="relative z-10">
                     <h1 className="mb-6 text-headline-lg leading-tight text-on-background md:text-display-lg">
                         {t("Find Reliable Professionals in")}{" "}
-                        <span className="text-primary">{t("DRC")}</span>
+                        <span className="text-secondary-container">
+                            {t("DRC")}
+                        </span>
                     </h1>
                     <p className="mb-10 max-w-lg text-body-lg text-on-surface-variant">
                         {t(

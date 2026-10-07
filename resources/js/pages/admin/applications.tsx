@@ -5,6 +5,7 @@ import {
     ExternalLink,
     Eye,
     Inbox,
+    Info,
     Mail,
     MapPin,
     MessageSquareText,
@@ -393,6 +394,7 @@ function ApplicationDetail({
 }) {
     const { categoryName } = useCategories();
     const missingItems = application.checklist.filter((item) => !item.isDone);
+    const canApprove = application.missingCompanyDetails.length === 0;
     const latestDecision = application.reviews.find(
         (review) => review.reviewerName !== null,
     );
@@ -408,6 +410,10 @@ function ApplicationDetail({
                         </h2>
                         <p className="text-sm text-zinc-500">
                             {application.contactName} ·{' '}
+                            {application.providerType === 'company'
+                                ? t('Company')
+                                : t('Individual')}{' '}
+                            ·{' '}
                             {application.type === 'vehicle_provider'
                                 ? t('Vehicle rental')
                                 : t('Services')}
@@ -680,11 +686,36 @@ function ApplicationDetail({
                 )}
             </section>
 
+            {!canApprove && (
+                <p
+                    id={`approve-blocked-${application.key}`}
+                    className="flex items-start gap-2 px-6 pt-6 text-sm text-zinc-700"
+                >
+                    <Info
+                        className="mt-0.5 size-4 shrink-0 text-zinc-400"
+                        aria-hidden="true"
+                    />
+                    {t(
+                        'A company can only be verified once its registration is on file. Still missing: :items.',
+                        {
+                            items: application.missingCompanyDetails
+                                .map((item) => t(item))
+                                .join(', '),
+                        },
+                    )}
+                </p>
+            )}
             <footer className="flex flex-col gap-2 p-6 sm:flex-row">
                 <button
                     type="button"
                     onClick={() => onDecide('approve')}
-                    className="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-container"
+                    disabled={!canApprove}
+                    aria-describedby={
+                        canApprove
+                            ? undefined
+                            : `approve-blocked-${application.key}`
+                    }
+                    className="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-container disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
                 >
                     {t('Approve')}
                 </button>

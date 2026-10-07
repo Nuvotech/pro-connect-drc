@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Resources\PublicProfessionalResource;
 use App\Models\Professional;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -126,4 +127,48 @@ test('a new ID document replaces the old file', function () {
 
     Storage::disk('local')->assertMissing('professionals/documents/old.pdf');
     Storage::disk('local')->assertExists($professional->fresh()->identity_document_path);
+});
+
+test('a pro can add a profile cover, which replaces the default on their public profile', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('professionals/covers/old.jpg', 'old');
+    $pro = User::factory()->create();
+    $professional = Professional::factory()->verified()->for($pro)->locatedIn('Kinshasa', 'Limete')->withCategories(['electricians'])->create([
+        ...Arr::except(listingPayload(), ['categories', 'city', 'commune']),
+        'cover_path' => 'professionals/covers/old.jpg',
+    ]);
+
+    $this->actingAs($pro)
+        ->patch(route('dashboard.listing.update'), listingPayload([
+            'cover' => UploadedFile::fake()->image('cover.jpg', 1600, 400),
+        ]))
+        ->assertSessionHasNoErrors();
+
+    $coverPath = $professional->fresh()->cover_path;
+
+    Storage::disk('public')->assertMissing('professionals/covers/old.jpg');
+    Storage::disk('public')->assertExists($coverPath);
+    expect($professional->fresh()->isVerified())->toBeTrue();
+
+    $this->get(route('professionals.show', $professional->slug))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('professional.cover', Storage::disk('public')->url($coverPath)));
+});
+
+test('a listing without a cover shows the generic cover', function () {
+    $professional = Professional::factory()->verified()->withCategories(['electricians'])->create(['cover_path' => null]);
+
+    $this->get(route('professionals.show', $professional->slug))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('professional.cover', PublicProfessionalResource::DEFAULT_COVER));
+});
+
+test('the cover must be an image', function () {
+    $pro = User::factory()->create();
+
+    $this->actingAs($pro)
+        ->post(route('dashboard.listing.store'), listingPayload([
+            'cover' => UploadedFile::fake()->create('cover.pdf', 100, 'application/pdf'),
+        ]))
+        ->assertSessionHasErrors(['cover' => 'The cover must be an image.']);
 });

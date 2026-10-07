@@ -1,4 +1,4 @@
-import { FileUp, ImageUp } from 'lucide-react';
+import { ImageUp } from 'lucide-react';
 import { useState } from 'react';
 import {
     Checkbox,
@@ -7,12 +7,16 @@ import {
     FormSection,
     inputClassName,
 } from '@/components/workspace/form-fields';
+import ProviderTypeField from '@/components/workspace/provider-type-field';
 import ServicesPicker from '@/components/workspace/services-picker';
+import VerificationFields from '@/components/workspace/verification-fields';
 import { cn } from '@/lib/utils';
 import { useCities } from '@/hooks/use-categories';
 import { t } from '@/lib/i18n';
+import type { ProviderType } from '@/types';
 
 export type ProfessionalFieldDefaults = {
+    provider_type: ProviderType;
     categories: string[];
     experience_years: number | null;
     business_name: string | null;
@@ -28,7 +32,9 @@ export type ProfessionalFieldDefaults = {
     registry_number: string | null;
     tax_id: string | null;
     has_photo: boolean;
+    has_cover: boolean;
     has_identity_document: boolean;
+    has_business_registration: boolean;
 };
 
 /**
@@ -51,11 +57,49 @@ export default function ProfessionalFields({
     );
     const [city, setCity] = useState(defaults?.city ?? '');
     const [photoName, setPhotoName] = useState<string>();
-    const [documentName, setDocumentName] = useState<string>();
+    const [coverName, setCoverName] = useState<string>();
+    const [providerType, setProviderType] = useState<ProviderType>(
+        defaults?.provider_type ?? 'individual',
+    );
+    const isCompany = providerType === 'company';
     const communes = findCity(city)?.communes ?? [];
 
     return (
         <>
+            <FormSection
+                title={t('Individual or company')}
+                description={t(
+                    'Individuals and companies are verified differently.',
+                )}
+            >
+                <ProviderTypeField
+                    value={providerType}
+                    onChange={setProviderType}
+                    error={errors.provider_type}
+                />
+                <Field
+                    label={isCompany ? t('Company name') : t('Trade name')}
+                    htmlFor="business_name"
+                    error={errors.business_name}
+                    isOptional={!isCompany}
+                    className="sm:col-span-2"
+                >
+                    <input
+                        id="business_name"
+                        name="business_name"
+                        defaultValue={defaults?.business_name ?? undefined}
+                        autoComplete="organization"
+                        placeholder={
+                            isCompany
+                                ? t('e.g. Dupont Plomberie SARL')
+                                : t("e.g. Jean's Plumbing")
+                        }
+                        aria-invalid={Boolean(errors.business_name)}
+                        className={inputClassName}
+                    />
+                </Field>
+            </FormSection>
+
             <FormSection
                 title={t('Service')}
                 description={t('What this professional offers.')}
@@ -89,22 +133,6 @@ export default function ProfessionalFields({
                     />
                 </Field>
                 <Field
-                    label={t('Business name')}
-                    htmlFor="business_name"
-                    error={errors.business_name}
-                    isOptional
-                >
-                    <input
-                        id="business_name"
-                        name="business_name"
-                        defaultValue={defaults?.business_name ?? undefined}
-                        autoComplete="organization"
-                        placeholder={t('e.g. Dupont Plomberie SARL')}
-                        aria-invalid={Boolean(errors.business_name)}
-                        className={inputClassName}
-                    />
-                </Field>
-                <Field
                     label={t('About their services')}
                     htmlFor="bio"
                     error={errors.bio}
@@ -133,7 +161,7 @@ export default function ProfessionalFields({
                 description={t('How clients and our team reach them.')}
             >
                 <Field
-                    label={t('Full name')}
+                    label={isCompany ? t('Contact person') : t('Full name')}
                     htmlFor="full_name"
                     error={errors.full_name}
                     className="sm:col-span-2"
@@ -311,39 +339,15 @@ export default function ProfessionalFields({
                 title={t('Verification')}
                 description={t('Registration details and documents.')}
             >
-                <Field
-                    label={t('RCCM number')}
-                    htmlFor="registry_number"
-                    error={errors.registry_number}
-                    isOptional
-                >
-                    <input
-                        id="registry_number"
-                        name="registry_number"
-                        defaultValue={defaults?.registry_number ?? undefined}
-                        placeholder={t('CD/KIN/RCCM/…')}
-                        aria-invalid={Boolean(errors.registry_number)}
-                        className={cn(inputClassName, 'font-mono')}
-                    />
-                </Field>
-                <Field
-                    label={t('Tax ID')}
-                    htmlFor="tax_id"
-                    error={errors.tax_id}
-                    isOptional
-                >
-                    <input
-                        id="tax_id"
-                        name="tax_id"
-                        defaultValue={defaults?.tax_id ?? undefined}
-                        placeholder="01-00-X00000X"
-                        aria-invalid={Boolean(errors.tax_id)}
-                        className={cn(inputClassName, 'font-mono')}
-                    />
-                </Field>
+                <VerificationFields
+                    providerType={providerType}
+                    errors={errors}
+                    defaults={defaults}
+                    identityLabel={t('ID document')}
+                />
                 <FileField
                     id="photo"
-                    label={t('Profile photo')}
+                    label={isCompany ? t('Logo') : t('Profile photo')}
                     name="photo"
                     accept="image/jpeg,image/png,image/webp"
                     hint={t('JPG, PNG or WebP, up to 5 MB')}
@@ -358,23 +362,25 @@ export default function ProfessionalFields({
                     error={errors.photo}
                 />
                 <FileField
-                    id="identity_document"
-                    label={t('ID document')}
-                    name="identity_document"
-                    accept="application/pdf,image/jpeg,image/png"
-                    hint={t('PDF, JPG or PNG, up to 10 MB · kept private')}
-                    icon={<FileUp className="size-5" />}
+                    id="cover"
+                    label={t('Profile cover')}
+                    name="cover"
+                    accept="image/jpeg,image/png,image/webp"
+                    hint={t(
+                        'Wide banner, ideally 1600 × 400 · JPG, PNG or WebP, up to 5 MB',
+                    )}
+                    icon={<ImageUp className="size-5" />}
                     fileName={
-                        documentName ??
-                        (defaults?.has_identity_document
-                            ? 'Current document on file'
+                        coverName ??
+                        (defaults?.has_cover
+                            ? t('Current cover on file')
                             : undefined)
                     }
-                    onFileChange={setDocumentName}
-                    error={errors.identity_document}
+                    onFileChange={setCoverName}
+                    error={errors.cover}
                 />
                 {showVerifiedToggle && (
-                    <div className="sm:col-span-2">
+                    <div className="flex flex-col gap-1.5 sm:col-span-2">
                         <Checkbox
                             name="is_verified"
                             label={t('Mark as verified now')}
@@ -382,6 +388,11 @@ export default function ProfessionalFields({
                                 'The documents have been checked and the profile can go live.',
                             )}
                         />
+                        {errors.is_verified && (
+                            <p className="text-xs font-medium text-zinc-900">
+                                {errors.is_verified}
+                            </p>
+                        )}
                     </div>
                 )}
             </FormSection>

@@ -112,20 +112,16 @@ class ProfessionalController extends Controller
     {
         $professional = new Professional($request->safe()->except([
             'photo',
+            'cover',
             'identity_document',
+            'business_registration',
             'is_verified',
         ]));
 
         $professional->placeIn($request->validated('city'), $request->validated('commune'));
         $professional->onboarded_by_id = $request->user()->id;
-
-        if ($request->hasFile('photo')) {
-            $professional->photo_path = $request->file('photo')->store('professionals/photos', 'public');
-        }
-
-        if ($request->hasFile('identity_document')) {
-            $professional->identity_document_path = $request->file('identity_document')->store('professionals/documents', 'local');
-        }
+        $professional->storeProfileImages($request);
+        $professional->storeVerificationDocuments($request);
 
         $professional->save();
         $professional->syncCategories($request->validated('categories'));

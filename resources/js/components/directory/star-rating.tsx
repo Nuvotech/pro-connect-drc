@@ -15,10 +15,7 @@ export default function StarRating({
 }: StarRatingProps) {
     return (
         <span
-            className={cn(
-                'flex items-center text-secondary-container',
-                className,
-            )}
+            className={cn('flex items-center text-rating', className)}
             aria-label={t(':rating out of 5 stars', { rating })}
         >
             {[1, 2, 3, 4, 5].map((position) => {

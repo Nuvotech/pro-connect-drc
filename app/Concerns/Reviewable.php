@@ -154,7 +154,7 @@ trait Reviewable
      */
     public function resetVerificationIfKeyFieldsChanged(): bool
     {
-        if (! $this->isVerified() || ! $this->isDirty(['registry_number', 'tax_id', 'identity_document_path'])) {
+        if (! $this->isVerified() || ! $this->isDirty(['provider_type', 'registry_number', 'tax_id', 'identity_document_path', 'business_registration_path'])) {
             return false;
         }
 

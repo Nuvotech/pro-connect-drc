@@ -57,6 +57,16 @@ test('messages are also emailed once a contact address is set', function () {
     );
 });
 
+test('a message is still saved when the email to the contact address fails', function () {
+    config(['services.contact.email' => 'hello@proconnect.cd']);
+    Notification::shouldReceive('route')->andThrow(new RuntimeException('Mail provider rejected the message'));
+
+    $this->post(route('contact.store'), contactPayload())
+        ->assertRedirect(route('contact'));
+
+    expect(ContactMessage::count())->toBe(1);
+});
+
 test('a message needs a way to reply and a real message', function (array $overrides, string $field) {
     $this->post(route('contact.store'), contactPayload($overrides))
         ->assertSessionHasErrors($field);

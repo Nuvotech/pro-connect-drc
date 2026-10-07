@@ -106,7 +106,11 @@ export default function Professional({
                                     </h1>
                                     {professional.isVerified && (
                                         <span
-                                            title={t('Verified Professional')}
+                                            title={
+                                                professional.isCompany
+                                                    ? t('Verified company')
+                                                    : t('Verified Professional')
+                                            }
                                         >
                                             <MaterialSymbol
                                                 name="verified"
@@ -122,6 +126,19 @@ export default function Professional({
                                         className="text-lg"
                                     />
                                     {professional.title}
+                                </p>
+                                <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-surface-container-high px-2.5 py-1 text-label-md text-on-surface-variant">
+                                    <MaterialSymbol
+                                        name={
+                                            professional.isCompany
+                                                ? 'apartment'
+                                                : 'person'
+                                        }
+                                        className="text-base"
+                                    />
+                                    {professional.isCompany
+                                        ? t('Registered company')
+                                        : t('Independent professional')}
                                 </p>
                                 <div className="mt-3 flex flex-wrap items-center gap-4">
                                     {professional.reviewsCount > 0 ? (

@@ -10,7 +10,6 @@ use App\Models\Professional;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -84,7 +83,7 @@ class ListingController extends Controller
             return to_route('dashboard');
         }
 
-        $professional = new Professional($request->safe()->except(['photo', 'identity_document']));
+        $professional = new Professional($request->safe()->except(['photo', 'cover', 'identity_document', 'business_registration']));
         $professional->placeIn($request->validated('city'), $request->validated('commune'));
         $professional->user()->associate($request->user());
         $this->storeFiles($request, $professional);
@@ -126,7 +125,7 @@ class ListingController extends Controller
         abort_unless($professional, 404);
         Gate::authorize('update', $professional);
 
-        $professional->fill($request->safe()->except(['photo', 'identity_document']))->placeIn($request->validated('city'), $request->validated('commune'));
+        $professional->fill($request->safe()->except(['photo', 'cover', 'identity_document', 'business_registration']))->placeIn($request->validated('city'), $request->validated('commune'));
         $this->storeFiles($request, $professional);
         $needsReReview = $professional->resetVerificationIfKeyFieldsChanged();
         $professional->save();
@@ -144,25 +143,12 @@ class ListingController extends Controller
     }
 
     /**
-     * Store a newly uploaded profile photo or ID document, replacing the
-     * previous file.
+     * Store a newly uploaded profile photo, cover or verification
+     * documents, replacing the previous files.
      */
     private function storeFiles(SaveProfessionalListingRequest $request, Professional $professional): void
     {
-        if ($request->hasFile('photo')) {
-            if ($professional->photo_path) {
-                Storage::disk('public')->delete($professional->photo_path);
-            }
-
-            $professional->photo_path = $request->file('photo')->store('professionals/photos', 'public');
-        }
-
-        if ($request->hasFile('identity_document')) {
-            if ($professional->identity_document_path) {
-                Storage::disk('local')->delete($professional->identity_document_path);
-            }
-
-            $professional->identity_document_path = $request->file('identity_document')->store('professionals/documents', 'local');
-        }
+        $professional->storeProfileImages($request);
+        $professional->storeVerificationDocuments($request);
     }
 }

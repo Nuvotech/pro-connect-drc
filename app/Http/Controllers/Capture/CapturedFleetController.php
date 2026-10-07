@@ -11,7 +11,6 @@ use App\Models\VehicleProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -47,17 +46,9 @@ class CapturedFleetController extends Controller
      */
     public function update(UpdateCapturedFleetRequest $request, VehicleProvider $vehicleProvider): RedirectResponse
     {
-        $vehicleProvider->fill($request->safe()->except(['identity_document']))
+        $vehicleProvider->fill($request->safe()->except(['identity_document', 'business_registration']))
             ->placeIn($request->validated('city'), $request->validated('commune'));
-
-        if ($request->hasFile('identity_document')) {
-            if ($vehicleProvider->identity_document_path) {
-                Storage::disk('local')->delete($vehicleProvider->identity_document_path);
-            }
-
-            $vehicleProvider->identity_document_path = $request->file('identity_document')
-                ->store('vehicle-providers/documents', 'local');
-        }
+        $vehicleProvider->storeVerificationDocuments($request);
 
         $vehicleProvider->save();
 

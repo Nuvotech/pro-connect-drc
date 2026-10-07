@@ -34,6 +34,7 @@ class ReviewApplicationResource extends JsonResource
             'key' => "{$type}-{$this->id}",
             'type' => $type,
             'id' => $this->id,
+            'providerType' => $this->provider_type,
             'name' => $this->business_name ?? ($isProfessional ? $this->full_name : $this->contact_name),
             'contactName' => $isProfessional ? $this->full_name : $this->contact_name,
             'categories' => $isProfessional
@@ -55,7 +56,8 @@ class ReviewApplicationResource extends JsonResource
             'submittedAgo' => $this->submitted_at?->diffForHumans(),
             'checklist' => $checklist,
             'missingCount' => collect($checklist)->where('isDone', false)->count(),
-            'documents' => $this->documents($isProfessional, $type),
+            'missingCompanyDetails' => $this->resource->missingCompanyDetails(),
+            'documents' => $this->documents($type),
             'galleryCount' => $isProfessional ? $this->photos->count() : null,
             'vehicles' => $isProfessional ? [] : $this->vehicles->map(fn (Vehicle $vehicle) => [
                 'id' => $vehicle->id,
@@ -82,13 +84,12 @@ class ReviewApplicationResource extends JsonResource
      *
      * @return list<array{key: string, label: string, isOnFile: bool, url: string|null}>
      */
-    private function documents(bool $isProfessional, string $type): array
+    private function documents(string $type): array
     {
-        $documents = [['identity-document', 'ID document', $this->identity_document_path]];
-
-        if ($isProfessional) {
-            $documents[] = ['business-registration', 'Business registration', $this->business_registration_path];
-        }
+        $documents = [
+            ['identity-document', 'ID document', $this->identity_document_path],
+            ['business-registration', 'Business registration', $this->business_registration_path],
+        ];
 
         return array_map(fn (array $document) => [
             'key' => $document[0],

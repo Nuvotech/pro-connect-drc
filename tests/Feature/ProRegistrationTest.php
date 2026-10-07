@@ -12,6 +12,7 @@ use Inertia\Testing\AssertableInertia as Assert;
 function proApplicationPayload(array $overrides = []): array
 {
     return [
+        'provider_type' => 'company',
         'full_name' => 'Jean Dupont',
         'business_name' => 'Dupont Services SARL',
         'phone' => '81 234 5678',
@@ -61,6 +62,7 @@ test('applying creates a locked account with a pending application', function ()
         ->and($application)
         ->user_id->toBe($user->id)
         ->status->toBe(ProApplication::STATUS_PENDING)
+        ->isCompany()->toBeTrue()
         ->business_name->toBe('Dupont Services SARL')
         ->city->name->toBe('Kinshasa')
         ->commune->name->toBe('Gombe')
@@ -92,7 +94,20 @@ test('invalid applications are rejected', function (array $overrides, string $fi
     'typed-in service too long' => [['custom_services' => [str_repeat('a', 61)]], 'custom_services.0', 'Keep each service under 60 characters.'],
     'too many typed-in services' => [['custom_services' => ['One', 'Two', 'Three', 'Four', 'Five', 'Six']], 'custom_services', 'You can add up to 5 services of your own.'],
     'commune in another city' => [['commune' => 'Kenya'], 'commune', 'Choose a commune in the selected city.'],
+    'no provider type' => [['provider_type' => null], 'provider_type', 'Choose whether you work for yourself or for a company.'],
+    'company without a name' => [['business_name' => ''], 'business_name', 'Enter your company name.'],
 ]);
+
+test('an individual can apply without a business name', function () {
+    $this->post(route('become-a-pro.store'), proApplicationPayload([
+        'provider_type' => 'individual',
+        'business_name' => '',
+    ]))->assertRedirect(route('dashboard'));
+
+    expect(ProApplication::sole())
+        ->isCompany()->toBeFalse()
+        ->business_name->toBeNull();
+});
 
 test('an email that already has an account cannot apply again', function () {
     User::factory()->create(['email' => 'jean@dupont.example']);

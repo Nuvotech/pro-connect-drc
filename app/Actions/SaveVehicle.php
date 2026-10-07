@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Storage;
  */
 class SaveVehicle
 {
+    public function __construct(private StoreCompressedImage $storeImage) {}
+
     /**
      * Add a vehicle, with all of its photos, to a provider's fleet.
      *
@@ -69,7 +71,7 @@ class SaveVehicle
     {
         foreach ($photos as $angle => $photo) {
             $existing = $vehicle->photos()->where('angle', $angle)->first();
-            $path = $photo->store("vehicles/{$vehicle->id}", 'public');
+            $path = ($this->storeImage)($photo, "vehicles/{$vehicle->id}");
 
             if ($existing) {
                 Storage::disk('public')->delete($existing->path);

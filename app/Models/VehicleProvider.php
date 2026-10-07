@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Concerns\HasCustomerReviews;
 use App\Concerns\HasLocation;
 use App\Concerns\HasSlug;
+use App\Concerns\HasVerificationDocuments;
 use App\Concerns\Reviewable;
 use Database\Factories\VehicleProviderFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -19,6 +20,7 @@ use Illuminate\Support\Carbon;
  *
  * @property int $id
  * @property int|null $user_id
+ * @property string $provider_type
  * @property string|null $slug
  * @property string $contact_name
  * @property string|null $business_name
@@ -30,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $tax_id
  * @property string $preferred_language
  * @property string|null $identity_document_path
+ * @property string|null $business_registration_path
  * @property Carbon|null $verified_at
  * @property string $review_status
  * @property Carbon|null $submitted_at
@@ -38,6 +41,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  */
 #[Fillable([
+    'provider_type',
     'contact_name',
     'business_name',
     'phone',
@@ -51,7 +55,16 @@ use Illuminate\Support\Carbon;
 class VehicleProvider extends Model
 {
     /** @use HasFactory<VehicleProviderFactory> */
-    use HasCustomerReviews, HasFactory, HasLocation, HasSlug, Reviewable;
+    use HasCustomerReviews, HasFactory, HasLocation, HasSlug, HasVerificationDocuments, Reviewable;
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'provider_type' => self::PROVIDER_INDIVIDUAL,
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -75,6 +88,14 @@ class VehicleProvider extends Model
     protected function slugSource(): string
     {
         return $this->business_name ?? $this->contact_name;
+    }
+
+    /**
+     * The folder on the private disk where this listing's documents live.
+     */
+    protected function documentDirectory(): string
+    {
+        return 'vehicle-providers/documents';
     }
 
     /**
@@ -153,8 +174,7 @@ class VehicleProvider extends Model
         return [
             ['key' => 'vehicles', 'label' => 'At least one vehicle listed', 'isDone' => $hasVehicles],
             ['key' => 'vehicle_photos', 'label' => 'All 6 photos for every vehicle', 'isDone' => $hasVehicles && $this->firstVehicleMissingPhotos() === null],
-            ['key' => 'identity_document', 'label' => 'ID document uploaded', 'isDone' => $this->identity_document_path !== null],
-            ['key' => 'registry_number', 'label' => 'RCCM number added', 'isDone' => filled($this->registry_number)],
+            ...$this->verificationChecklist(),
         ];
     }
 

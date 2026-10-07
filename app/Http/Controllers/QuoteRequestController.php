@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\ResolveCustomer;
+use App\Actions\StoreCompressedImage;
 use App\Http\Requests\StoreQuoteRequestRequest;
 use App\Models\Category;
 use App\Models\Professional;
@@ -24,9 +25,9 @@ class QuoteRequestController extends Controller
     /**
      * Save the customer's request and its photos.
      */
-    public function store(StoreQuoteRequestRequest $request, ResolveCustomer $resolveCustomer): RedirectResponse
+    public function store(StoreQuoteRequestRequest $request, ResolveCustomer $resolveCustomer, StoreCompressedImage $storeImage): RedirectResponse
     {
-        $quoteRequest = DB::transaction(function () use ($request, $resolveCustomer) {
+        $quoteRequest = DB::transaction(function () use ($request, $resolveCustomer, $storeImage) {
             $customer = $resolveCustomer($request->safe()->only([
                 'full_name', 'phone', 'email', 'contact_channel', 'city', 'commune',
             ]), $request->user());
@@ -56,7 +57,7 @@ class QuoteRequestController extends Controller
                 collect($request->file('photos', []))
                     ->values()
                     ->map(fn (UploadedFile $photo, int $position) => [
-                        'path' => $photo->store("quote-requests/{$quoteRequest->id}", 'public'),
+                        'path' => $storeImage($photo, "quote-requests/{$quoteRequest->id}"),
                         'position' => $position,
                     ])
                     ->all(),

@@ -125,7 +125,7 @@ export default function Category({
                             <MaterialSymbol
                                 name="star"
                                 filled
-                                className="text-secondary-container"
+                                className="text-rating"
                             />
                             <span className="text-body-md text-on-surface">
                                 {minimumRating === 0

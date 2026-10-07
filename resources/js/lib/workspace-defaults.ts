@@ -15,6 +15,7 @@ export function professionalDefaults(
     listing: ProfessionalListing,
 ): ProfessionalFieldDefaults {
     return {
+        provider_type: listing.providerType,
         categories: listing.categories,
         experience_years: listing.experienceYears,
         business_name: listing.businessName,
@@ -30,7 +31,9 @@ export function professionalDefaults(
         registry_number: listing.registryNumber,
         tax_id: listing.taxId,
         has_photo: listing.photoUrl !== null,
+        has_cover: listing.coverUrl !== null,
         has_identity_document: listing.hasIdentityDocument,
+        has_business_registration: listing.hasBusinessRegistration,
     };
 }
 
@@ -38,6 +41,7 @@ export function vehicleProviderDefaults(
     provider: VehicleProviderDetail,
 ): VehicleProviderFieldDefaults {
     return {
+        provider_type: provider.providerType,
         contact_name: provider.contactName,
         business_name: provider.businessName,
         phone: provider.phone,
@@ -50,6 +54,7 @@ export function vehicleProviderDefaults(
         registry_number: provider.registryNumber,
         tax_id: provider.taxId,
         has_identity_document: provider.hasIdentityDocument,
+        has_business_registration: provider.hasBusinessRegistration,
     };
 }
 

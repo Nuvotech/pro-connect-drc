@@ -22,6 +22,7 @@ class ProfessionalListingResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'providerType' => $this->provider_type,
             'categories' => $this->categorySlugs(),
             'fullName' => $this->full_name,
             'businessName' => $this->business_name,
@@ -37,6 +38,7 @@ class ProfessionalListingResource extends JsonResource
             'bio' => $this->bio,
             'preferredLanguage' => $this->preferred_language,
             'photoUrl' => $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null,
+            'coverUrl' => $this->cover_path ? Storage::disk('public')->url($this->cover_path) : null,
             'hasIdentityDocument' => $this->identity_document_path !== null,
             'hasBusinessRegistration' => $this->business_registration_path !== null,
             'gallery' => $this->photos->map(fn (ProfessionalPhoto $photo) => Storage::disk('public')->url($photo->path)),

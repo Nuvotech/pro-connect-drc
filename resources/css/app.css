@@ -79,42 +79,50 @@
 @theme {
     --container-page: 1140px;
 
-    --color-outline: #707974;
-    --color-outline-variant: #bfc9c3;
+    --color-outline: #74777f;
+    --color-outline-variant: #c4c6d0;
     --color-error: #ba1a1a;
     --color-on-error: #ffffff;
     --color-error-container: #ffdad6;
     --color-on-error-container: #93000a;
 
+    /*
+     * Brand colours from the logo: navy #00285e (primary) and teal #009ca0
+     * (secondary container). Darker teal shades carry text, where the logo
+     * teal itself is too light to read on white.
+     */
     --color-on-primary: #ffffff;
-    --color-primary-container: #064e3b;
-    --color-on-primary-container: #80bea6;
-    --color-primary-fixed: #b0f0d6;
-    --color-primary-fixed-dim: #95d3ba;
-    --color-on-primary-fixed: #002117;
-    --color-on-primary-fixed-variant: #0b513d;
-    --color-inverse-primary: #95d3ba;
+    --color-primary-container: #0a3d82;
+    --color-on-primary-container: #a9c4f5;
+    --color-primary-fixed: #d9e3ff;
+    --color-primary-fixed-dim: #afc6f7;
+    --color-on-primary-fixed: #001537;
+    --color-on-primary-fixed-variant: #0a3d82;
+    --color-inverse-primary: #afc6f7;
 
     --color-on-secondary: #ffffff;
-    --color-secondary-container: #fea619;
-    --color-on-secondary-container: #684000;
-    --color-secondary-fixed: #ffddb8;
-    --color-secondary-fixed-dim: #ffb95f;
-    --color-on-secondary-fixed: #2a1700;
-    --color-on-secondary-fixed-variant: #653e00;
+    --color-secondary-container: #009ca0;
+    --color-on-secondary-container: #002021;
+    --color-secondary-fixed: #a0f0f2;
+    --color-secondary-fixed-dim: #4fd5d8;
+    --color-on-secondary-fixed: #002021;
+    --color-on-secondary-fixed-variant: #004f51;
 
-    --color-tertiary: #002873;
+    --color-tertiary: #00696c;
     --color-on-tertiary: #ffffff;
-    --color-tertiary-container: #003ca3;
-    --color-on-tertiary-container: #96afff;
-    --color-tertiary-fixed: #dbe1ff;
-    --color-tertiary-fixed-dim: #b4c5ff;
+    --color-tertiary-container: #009ca0;
+    --color-on-tertiary-container: #002021;
+    --color-tertiary-fixed: #a0f0f2;
+    --color-tertiary-fixed-dim: #4fd5d8;
+
+    /* Star ratings stay gold, the colour people expect for ratings. */
+    --color-rating: #f5a623;
 
     --color-on-background: #141b2b;
     --color-surface: #f9f9ff;
     --color-surface-bright: #f9f9ff;
     --color-surface-dim: #d3daef;
-    --color-surface-tint: #2b6954;
+    --color-surface-tint: #2c5aa0;
     --color-surface-variant: #dce2f7;
     --color-surface-container-lowest: #ffffff;
     --color-surface-container-low: #f1f3ff;
@@ -122,7 +130,7 @@
     --color-surface-container-high: #e1e8fd;
     --color-surface-container-highest: #dce2f7;
     --color-on-surface: #141b2b;
-    --color-on-surface-variant: #404944;
+    --color-on-surface-variant: #43474e;
     --color-inverse-surface: #293040;
     --color-inverse-on-surface: #edf0ff;
 
@@ -253,8 +261,9 @@
 
 /* Public directory pages and their portalled dialogs are light-only. */
 .proconnect {
-    --color-primary: #003527;
-    --color-secondary: #855300;
+    --color-primary: #00285e;
+    --color-secondary: #00696c;
+    --color-secondary-foreground: #ffffff;
     --color-background: #f9f9ff;
     --radius-sm: 0.25rem;
     --radius-md: 0.375rem;

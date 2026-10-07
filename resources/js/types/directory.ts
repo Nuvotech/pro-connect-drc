@@ -43,6 +43,7 @@ export type Professional = {
     summary: string;
     tags: string[];
     isVerified: boolean;
+    isCompany: boolean;
     experienceYears: number;
     serviceArea: string;
     startingRate: string;

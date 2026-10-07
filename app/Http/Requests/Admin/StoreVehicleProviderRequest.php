@@ -31,6 +31,16 @@ class StoreVehicleProviderRequest extends FormRequest
     }
 
     /**
+     * Get the "after" validation callables for the request.
+     *
+     * @return array<int, callable>
+     */
+    public function after(): array
+    {
+        return [$this->companyVerificationCheck()];
+    }
+
+    /**
      * Get custom messages for validator errors.
      *
      * @return array<string, string>

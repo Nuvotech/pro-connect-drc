@@ -1,20 +1,22 @@
-import { FileUp } from 'lucide-react';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import {
     Checkbox,
     Field,
-    FileField,
     FormSection,
     inputClassName,
 } from '@/components/workspace/form-fields';
+import ProviderTypeField from '@/components/workspace/provider-type-field';
+import VerificationFields from '@/components/workspace/verification-fields';
 import { cn } from '@/lib/utils';
 import { useCities } from '@/hooks/use-categories';
 import { t } from '@/lib/i18n';
+import type { ProviderType } from '@/types';
 
 const selectClassName = cn(inputClassName, 'cursor-pointer');
 
 export type VehicleProviderFieldDefaults = {
+    provider_type: ProviderType;
     contact_name: string;
     business_name: string | null;
     phone: string;
@@ -27,6 +29,7 @@ export type VehicleProviderFieldDefaults = {
     registry_number: string | null;
     tax_id: string | null;
     has_identity_document: boolean;
+    has_business_registration: boolean;
 };
 
 /**
@@ -47,7 +50,10 @@ export default function VehicleProviderFields({
 }) {
     const { cities, findCity } = useCities();
     const [city, setCity] = useState(defaults?.city ?? '');
-    const [documentName, setDocumentName] = useState<string>();
+    const [providerType, setProviderType] = useState<ProviderType>(
+        defaults?.provider_type ?? 'individual',
+    );
+    const isCompany = providerType === 'company';
     const communes = findCity(city)?.communes ?? [];
 
     return (
@@ -56,8 +62,13 @@ export default function VehicleProviderFields({
                 title={t('Owner')}
                 description={t('Who we deal with for bookings and payouts.')}
             >
+                <ProviderTypeField
+                    value={providerType}
+                    onChange={setProviderType}
+                    error={errors.provider_type}
+                />
                 <Field
-                    label={t('Contact name')}
+                    label={isCompany ? t('Contact person') : t('Contact name')}
                     htmlFor="contact_name"
                     error={errors.contact_name}
                 >
@@ -72,10 +83,10 @@ export default function VehicleProviderFields({
                     />
                 </Field>
                 <Field
-                    label={t('Business name')}
+                    label={isCompany ? t('Company name') : t('Trade name')}
                     htmlFor="business_name"
                     error={errors.business_name}
-                    isOptional
+                    isOptional={!isCompany}
                 >
                     <input
                         id="business_name"
@@ -246,62 +257,26 @@ export default function VehicleProviderFields({
                 title={t('Verification')}
                 description={t('Registration details and ownership documents.')}
             >
-                <Field
-                    label={t('RCCM number')}
-                    htmlFor="registry_number"
-                    error={errors.registry_number}
-                    isOptional
-                >
-                    <input
-                        id="registry_number"
-                        name="registry_number"
-                        defaultValue={defaults?.registry_number ?? undefined}
-                        placeholder={t('CD/KIN/RCCM/…')}
-                        aria-invalid={Boolean(errors.registry_number)}
-                        className={cn(inputClassName, 'font-mono')}
-                    />
-                </Field>
-                <Field
-                    label={t('Tax ID')}
-                    htmlFor="tax_id"
-                    error={errors.tax_id}
-                    isOptional
-                >
-                    <input
-                        id="tax_id"
-                        name="tax_id"
-                        defaultValue={defaults?.tax_id ?? undefined}
-                        placeholder="01-00-X00000X"
-                        aria-invalid={Boolean(errors.tax_id)}
-                        className={cn(inputClassName, 'font-mono')}
-                    />
-                </Field>
-                <FileField
-                    id="identity_document"
-                    label={t('Owner ID document')}
-                    name="identity_document"
-                    accept="application/pdf,image/jpeg,image/png"
-                    hint={t('PDF, JPG or PNG, up to 10 MB · kept private')}
-                    icon={<FileUp className="size-5" />}
-                    fileName={
-                        documentName ??
-                        (defaults?.has_identity_document
-                            ? 'Current document on file'
-                            : undefined)
-                    }
-                    onFileChange={setDocumentName}
-                    error={errors.identity_document}
+                <VerificationFields
+                    providerType={providerType}
+                    errors={errors}
+                    defaults={defaults}
+                    identityLabel={t('Owner ID document')}
                 />
                 {showVerifiedToggle && (
-                    <div className="flex items-end sm:col-span-1">
-                        {' '}
+                    <div className="flex flex-col justify-end gap-1.5 sm:col-span-1">
                         <Checkbox
                             name="is_verified"
                             label={t('Mark as verified now')}
                             description={t(
                                 'Ownership and documents have been checked.',
                             )}
-                        />{' '}
+                        />
+                        {errors.is_verified && (
+                            <p className="text-xs font-medium text-zinc-900">
+                                {errors.is_verified}
+                            </p>
+                        )}
                     </div>
                 )}
             </FormSection>
