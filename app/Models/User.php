@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\Channels\WhatsAppChannel;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\URL;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -19,7 +21,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 /**
  * @property int $id
  * @property string $name
- * @property string $email
+ * @property string|null $email
+ * @property string|null $phone
  * @property string $role
  * @property string|null $locale
  * @property Carbon|null $pro_approved_at
@@ -33,7 +36,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'phone', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements HasLocalePreference, MustVerifyEmail, PasskeyUser
 {
@@ -59,6 +62,41 @@ class User extends Authenticatable implements HasLocalePreference, MustVerifyEma
      * Staff who only add professionals and fleets for review.
      */
     public const ROLE_CAPTURER = 'capturer';
+
+    /**
+     * How long a verification link an admin sends by hand stays valid.
+     */
+    public const VERIFICATION_LINK_LIFETIME_DAYS = 7;
+
+    /**
+     * A phone number as accounts store it, so the same number always
+     * matches however it was typed.
+     */
+    public static function normalizePhone(string $phone): string
+    {
+        return WhatsAppChannel::internationalNumber($phone);
+    }
+
+    /**
+     * What the verification link is tied to: the email, or the phone
+     * number for accounts that have no email.
+     */
+    public function getEmailForVerification(): string
+    {
+        return $this->email ?? (string) $this->phone;
+    }
+
+    /**
+     * The link that verifies this account, for an admin to send by hand.
+     */
+    public function verificationUrl(): string
+    {
+        return URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addDays(self::VERIFICATION_LINK_LIFETIME_DAYS),
+            ['id' => $this->getKey(), 'hash' => sha1($this->getEmailForVerification())],
+        );
+    }
 
     /**
      * The language emails and notifications are sent in: the one the user

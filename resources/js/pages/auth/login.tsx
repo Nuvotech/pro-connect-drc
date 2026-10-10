@@ -37,17 +37,17 @@ export default function Login({ status, canResetPassword }: Props) {
                     <>
                         <AuthField
                             id="email"
-                            label={t('Email address')}
+                            label={t('Email or phone number')}
                             error={errors.email}
                         >
                             <AuthInput
                                 id="email"
-                                type="email"
+                                type="text"
                                 name="email"
                                 required
                                 autoFocus
-                                autoComplete="email"
-                                placeholder={t('you@example.com')}
+                                autoComplete="username"
+                                placeholder={t('you@example.com or 81 234 5678')}
                                 aria-invalid={Boolean(errors.email)}
                             />
                         </AuthField>

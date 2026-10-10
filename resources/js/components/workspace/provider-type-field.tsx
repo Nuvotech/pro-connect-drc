@@ -1,4 +1,4 @@
-import { Building2, UserRound } from 'lucide-react';
+import { Building2, Check, UserRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
 import type { ProviderType } from '@/types';
@@ -26,6 +26,27 @@ const copy = {
             description:
                 'Registered business. Verified with its RCCM and tax ID.',
         },
+    },
+} as const;
+
+/**
+ * Each choice has its own colour from the start, so the two are easy to
+ * tell apart; the selected one turns solid.
+ */
+const tones = {
+    individual: {
+        idle: 'border-teal-200 bg-teal-50 hover:bg-teal-100/70',
+        selected: 'border-teal-700 bg-teal-100 ring-1 ring-teal-700',
+        idleIcon: 'bg-teal-100 text-teal-700',
+        solid: 'bg-teal-700 text-white',
+        label: 'text-teal-900',
+    },
+    company: {
+        idle: 'border-blue-200 bg-blue-50 hover:bg-blue-100/70',
+        selected: 'border-blue-800 bg-blue-100 ring-1 ring-blue-800',
+        idleIcon: 'bg-blue-100 text-blue-800',
+        solid: 'bg-blue-800 text-white',
+        label: 'text-blue-950',
     },
 } as const;
 
@@ -62,15 +83,15 @@ export default function ProviderTypeField({
                 {options.map((option) => {
                     const isSelected = value === option.value;
                     const Icon = option.icon;
+                    const tone = tones[option.value];
 
                     return (
                         <label
                             key={option.value}
                             className={cn(
-                                'flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3 transition-colors duration-200 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/15',
-                                isSelected
-                                    ? 'border-primary bg-primary/5'
-                                    : 'border-zinc-200 hover:bg-zinc-50',
+                                'relative flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3 transition-colors duration-200 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/15',
+                                isSelected ? tone.selected : tone.idle,
+                                !isSelected && error && 'border-error',
                             )}
                         >
                             <input
@@ -81,29 +102,45 @@ export default function ProviderTypeField({
                                 onChange={() => onChange(option.value)}
                                 className="sr-only"
                             />
-                            <Icon
+                            <span
                                 aria-hidden="true"
                                 className={cn(
-                                    'mt-0.5 size-5 shrink-0',
-                                    isSelected
-                                        ? 'text-primary'
-                                        : 'text-zinc-400',
+                                    'flex size-9 shrink-0 items-center justify-center rounded-full transition-colors duration-200',
+                                    isSelected ? tone.solid : tone.idleIcon,
                                 )}
-                            />
-                            <span className="flex flex-col">
-                                <span className="text-sm font-medium text-zinc-900">
+                            >
+                                <Icon className="size-5" />
+                            </span>
+                            <span className="flex flex-col pr-6">
+                                <span
+                                    className={cn(
+                                        'text-sm font-medium',
+                                        tone.label,
+                                    )}
+                                >
                                     {t(option.label)}
                                 </span>
-                                <span className="text-xs text-zinc-500">
+                                <span className="text-xs text-zinc-600">
                                     {t(option.description)}
                                 </span>
                             </span>
+                            {isSelected && (
+                                <span
+                                    aria-hidden="true"
+                                    className={cn(
+                                        'absolute top-2.5 right-2.5 flex size-5 items-center justify-center rounded-full',
+                                        tone.solid,
+                                    )}
+                                >
+                                    <Check className="size-3.5" />
+                                </span>
+                            )}
                         </label>
                     );
                 })}
             </div>
             {error && (
-                <p className="mt-1.5 text-xs font-medium text-zinc-900">
+                <p className="mt-1.5 text-xs font-medium text-error">
                     {error}
                 </p>
             )}

@@ -39,7 +39,7 @@ trait ProfileValidationRules
     protected function emailRules(?int $userId = null): array
     {
         return [
-            'required',
+            $userId !== null && filled(User::whereKey($userId)->value('phone')) ? 'nullable' : 'required',
             'string',
             'email',
             'max:255',

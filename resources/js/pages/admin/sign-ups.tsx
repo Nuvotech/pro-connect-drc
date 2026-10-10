@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
+import LinkShareActions from '@/components/workspace/link-share-actions';
 import PageHeader from '@/components/workspace/page-header';
 import { cn } from '@/lib/utils';
 import {
@@ -88,7 +89,7 @@ export default function SignUps({
             [
                 application.fullName,
                 application.businessName ?? '',
-                application.email,
+                application.email ?? '',
                 application.phone,
                 ...application.categories.map((category) => category.name),
                 ...application.customServices.map((service) => service.name),
@@ -377,7 +378,11 @@ function ApplicationDetail({
             <Section title={t('Contact')}>
                 <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                     <ContactItem icon={<Mail className="size-4" />}>
-                        {application.email}
+                        {application.email ?? (
+                            <span className="text-zinc-500">
+                                {t('No email address')}
+                            </span>
+                        )}
                     </ContactItem>
                     <ContactItem icon={<Phone className="size-4" />}>
                         +243 {application.phone}
@@ -396,6 +401,33 @@ function ApplicationDetail({
                     </ContactItem>
                 </dl>
             </Section>
+
+            {application.verificationUrl && (
+                <Section title={t('Account not verified yet')}>
+                    <p className="mb-3 text-sm text-zinc-600">
+                        {application.email
+                            ? t(
+                                  'We emailed them a verification link. You can also send it on WhatsApp.',
+                              )
+                            : t(
+                                  'They have no email address. Send them this link on WhatsApp so they can open their account.',
+                              )}{' '}
+                        {t('The link works for 7 days.')}
+                    </p>
+                    <LinkShareActions
+                        url={application.verificationUrl}
+                        phone={application.phone}
+                        message={t(
+                            'Hello :firstName, thank you for applying to join ProConnect! Open this link to verify your account: :url',
+                            {
+                                firstName: application.fullName.split(' ')[0],
+                                url: application.verificationUrl,
+                            },
+                        )}
+                        copyLabel={t('Copy verification link')}
+                    />
+                </Section>
+            )}
 
             <Section title={t('Wants to offer')}>
                 <div className="flex flex-col gap-4">

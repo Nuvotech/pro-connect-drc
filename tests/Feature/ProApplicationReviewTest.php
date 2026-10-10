@@ -178,3 +178,18 @@ test('an approved pro offering both can set up a service listing and a fleet', f
     expect($pro->fresh()->hasProfessionalListing())->toBeTrue()
         ->and($pro->fresh()->hasFleet())->toBeFalse();
 });
+
+test('admins get a verification link to send only while the applicant is unverified', function () {
+    $unverified = ProApplication::factory()->create();
+    $unverified->user->forceFill(['email' => null, 'phone' => '243812345678', 'email_verified_at' => null])->save();
+    $verified = ProApplication::factory()->create();
+
+    $this->actingAs(User::factory()->admin()->create())
+        ->get(route('admin.sign-ups.index'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('applications.0.email', null)
+            ->where('applications.0.isVerified', false)
+            ->where('applications.0.verificationUrl', fn (?string $url) => str_contains((string) $url, '/email/verify/'.$unverified->user_id.'/'))
+            ->where('applications.1.isVerified', true)
+            ->where('applications.1.verificationUrl', null));
+});

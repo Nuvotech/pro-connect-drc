@@ -2,11 +2,12 @@
 
 namespace App\Http\Requests\Auth;
 
-use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Concerns\ReferenceDataRules;
 use App\Models\Category;
 use App\Models\ProApplication;
+use App\Models\User;
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -17,7 +18,7 @@ use Illuminate\Validation\Rule;
  */
 class ProRegistrationRequest extends FormRequest
 {
-    use PasswordValidationRules, ProfileValidationRules, ReferenceDataRules;
+    use ProfileValidationRules, ReferenceDataRules;
 
     /**
      * Prepare the data for validation.
@@ -44,16 +45,20 @@ class ProRegistrationRequest extends FormRequest
             'provider_type' => ['required', Rule::in(ProApplication::PROVIDER_TYPES)],
             'full_name' => $this->nameRules(),
             'business_name' => ['nullable', 'required_if:provider_type,'.ProApplication::PROVIDER_COMPANY, 'string', 'max:255'],
-            'phone' => ['required', 'string', 'regex:/^[0-9 ]{9,20}$/'],
+            'phone' => ['bail', 'required', 'string', 'regex:/^[0-9 ]{9,20}$/', function (string $attribute, mixed $value, Closure $fail): void {
+                if (User::where('phone', User::normalizePhone((string) $value))->exists()) {
+                    $fail(__('An account with this phone number already exists. Log in instead.'));
+                }
+            }],
             'is_on_whatsapp' => ['boolean'],
-            'email' => $this->emailRules(),
+            'email' => ['nullable', ...array_slice($this->emailRules(), 1)],
             ...$this->locationRules(),
             'categories' => ['required_without:custom_services', 'array'],
             'categories.*' => ['string', 'distinct', $this->categoryExists(array_keys(Category::GROUP_LABELS))],
             'custom_services' => ['required_without:categories', 'array', 'max:'.ProApplication::MAX_CUSTOM_SERVICES],
             'custom_services.*' => ['string', 'max:60', 'distinct:ignore_case'],
             'description' => ['nullable', 'string', 'max:1000'],
-            'password' => $this->passwordRules(),
+            'password' => ['required', 'string', 'min:6', 'regex:/\p{Lu}/u', 'confirmed'],
         ];
     }
 
@@ -77,6 +82,9 @@ class ProRegistrationRequest extends FormRequest
             'custom_services.max' => __('You can add up to :count services of your own.', ['count' => ProApplication::MAX_CUSTOM_SERVICES]),
             'custom_services.*.max' => __('Keep each service under 60 characters.'),
             'custom_services.*.distinct' => __('You added this service twice.'),
+            'password.min' => __('Use at least 6 characters.'),
+            'password.regex' => __('Include at least one capital letter.'),
+            'password.confirmed' => __('The passwords do not match.'),
         ];
     }
 }

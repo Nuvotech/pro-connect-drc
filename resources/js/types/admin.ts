@@ -239,7 +239,11 @@ export type ProApplicationDetail = {
     providerType: ProviderType;
     fullName: string;
     businessName: string | null;
-    email: string;
+    email: string | null;
+    /** Whether the applicant has opened their verification link. */
+    isVerified: boolean;
+    /** The link to send them by hand; null once they are verified. */
+    verificationUrl: string | null;
     phone: string;
     isOnWhatsApp: boolean;
     city: string | null;

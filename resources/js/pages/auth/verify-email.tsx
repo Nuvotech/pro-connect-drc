@@ -1,18 +1,38 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, setLayoutProps } from '@inertiajs/react';
 import { AuthStatus, AuthSubmit } from '@/components/auth/auth-form';
 import MaterialSymbol from '@/components/directory/material-symbol';
 import { t } from '@/lib/i18n';
 import { logout } from '@/routes';
 import { send } from '@/routes/verification';
 
-export default function VerifyEmail({ status }: { status?: string }) {
+export default function VerifyEmail({
+    status,
+    hasEmail = true,
+}: {
+    status?: string;
+    hasEmail?: boolean;
+}) {
+    if (!hasEmail) {
+        setLayoutProps({
+            title: 'Almost there',
+            description:
+                'We will send your verification link on WhatsApp shortly. Open it to access your account.',
+        });
+    }
+
     return (
         <>
-            <Head title={t('Email verification')} />
+            <Head
+                title={
+                    hasEmail
+                        ? t('Email verification')
+                        : t('Account verification')
+                }
+            />
 
             <div className="mb-5 flex justify-center">
                 <MaterialSymbol
-                    name="mark_email_unread"
+                    name={hasEmail ? 'mark_email_unread' : 'chat'}
                     className="text-[48px] text-primary"
                 />
             </div>
@@ -28,9 +48,11 @@ export default function VerifyEmail({ status }: { status?: string }) {
             <Form {...send.form()} className="flex flex-col gap-3">
                 {({ processing }) => (
                     <>
-                        <AuthSubmit processing={processing}>
-                            {t('Resend verification email')}
-                        </AuthSubmit>
+                        {hasEmail && (
+                            <AuthSubmit processing={processing}>
+                                {t('Resend verification email')}
+                            </AuthSubmit>
+                        )}
                         <Link
                             href={logout()}
                             as="button"

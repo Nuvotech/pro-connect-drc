@@ -23,8 +23,8 @@ function proApplicationPayload(array $overrides = []): array
         'categories' => ['plumbers', 'law-firms', 'pick-ups-4x4s'],
         'custom_services' => ['Generator repair'],
         'description' => 'Plumbing, legal advice and pick-up hire.',
-        'password' => 'a-strong-password-123',
-        'password_confirmation' => 'a-strong-password-123',
+        'password' => 'Kin243',
+        'password_confirmation' => 'Kin243',
         ...$overrides,
     ];
 }
@@ -96,6 +96,9 @@ test('invalid applications are rejected', function (array $overrides, string $fi
     'commune in another city' => [['commune' => 'Kenya'], 'commune', 'Choose a commune in the selected city.'],
     'no provider type' => [['provider_type' => null], 'provider_type', 'Choose whether you work for yourself or for a company.'],
     'company without a name' => [['business_name' => ''], 'business_name', 'Enter your company name.'],
+    'password under 6 characters' => [['password' => 'Kin24', 'password_confirmation' => 'Kin24'], 'password', 'Use at least 6 characters.'],
+    'password without a capital letter' => [['password' => 'kin243', 'password_confirmation' => 'kin243'], 'password', 'Include at least one capital letter.'],
+    'passwords that do not match' => [['password_confirmation' => 'Kin244'], 'password', 'The passwords do not match.'],
 ]);
 
 test('an individual can apply without a business name', function () {
@@ -124,4 +127,34 @@ test('signed-in users cannot apply again', function () {
         ->assertRedirect(route('dashboard'));
 
     expect(ProApplication::count())->toBe(0);
+});
+
+test('a pro can apply with a phone number and no email', function () {
+    Notification::fake();
+
+    $this->post(route('become-a-pro.store'), proApplicationPayload(['email' => '', 'phone' => '081 234 5678']))
+        ->assertRedirect(route('dashboard'));
+
+    $user = User::sole();
+
+    $this->assertAuthenticatedAs($user);
+
+    expect($user)
+        ->email->toBeNull()
+        ->phone->toBe('243812345678')
+        ->hasVerifiedEmail()->toBeFalse();
+});
+
+test('a phone number that already has an account cannot apply again', function () {
+    User::factory()->create(['phone' => '243812345678']);
+
+    $this->post(route('become-a-pro.store'), proApplicationPayload(['phone' => '081 234 5678']))
+        ->assertSessionHasErrors(['phone' => 'An account with this phone number already exists. Log in instead.']);
+
+    expect(ProApplication::count())->toBe(0);
+});
+
+test('an email is still checked when one is given', function () {
+    $this->post(route('become-a-pro.store'), proApplicationPayload(['email' => 'not-an-email']))
+        ->assertSessionHasErrors('email');
 });

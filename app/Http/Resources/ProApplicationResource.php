@@ -28,6 +28,8 @@ class ProApplicationResource extends JsonResource
             'fullName' => $this->full_name,
             'businessName' => $this->business_name,
             'email' => $this->user->email,
+            'isVerified' => $this->user->hasVerifiedEmail(),
+            'verificationUrl' => $this->user->hasVerifiedEmail() ? null : $this->user->verificationUrl(),
             'phone' => $this->phone,
             'isOnWhatsApp' => $this->is_on_whatsapp,
             'city' => $this->city?->name,

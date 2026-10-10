@@ -33,7 +33,7 @@ class ProApplicationController extends Controller
 
         $applications = ProApplication::query()
             ->where('status', $status)
-            ->with(['user:id,email', 'city:id,name', 'commune:id,name', 'categories', 'customServices.category', 'reviewedBy:id,name'])
+            ->with(['user:id,email,phone,email_verified_at', 'city:id,name', 'commune:id,name', 'categories', 'customServices.category', 'reviewedBy:id,name'])
             ->oldest()
             ->get();
 

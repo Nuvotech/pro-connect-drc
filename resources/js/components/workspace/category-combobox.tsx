@@ -210,7 +210,7 @@ export default function CategoryCombobox({
                 }}
                 className={cn(
                     'flex min-h-10 w-full cursor-text flex-wrap items-center gap-1.5 rounded-lg border bg-white py-1.5 pr-9 pl-2 text-sm focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15',
-                    isInvalid ? 'border-zinc-900' : 'border-zinc-200',
+                    isInvalid ? 'border-error' : 'border-zinc-200',
                 )}
             >
                 {selectedOptions.map((option) => (

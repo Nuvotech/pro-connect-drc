@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { t } from '@/lib/i18n';
 
 export const inputClassName =
-    'h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-primary focus:ring-2 focus:ring-primary/15 focus:outline-none aria-[invalid=true]:border-zinc-900 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-400';
+    'h-10 w-full rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-primary focus:ring-2 focus:ring-primary/15 focus:outline-none aria-[invalid=true]:border-error aria-[invalid=true]:focus:border-error aria-[invalid=true]:focus:ring-error/15 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-400';
 
 export function FormSection({
     title,
@@ -64,7 +64,7 @@ export function Field({
             </label>
             {children}
             {error && (
-                <p className="text-xs font-medium text-zinc-900">{error}</p>
+                <p className="text-xs font-medium text-error">{error}</p>
             )}
         </div>
     );
@@ -136,7 +136,7 @@ export function FileField({
             <label
                 className={cn(
                     'flex cursor-pointer items-center gap-3 rounded-lg border border-dashed px-3 py-3 transition-colors duration-200 hover:bg-zinc-50 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/15',
-                    error ? 'border-zinc-900' : 'border-zinc-300',
+                    error ? 'border-error' : 'border-zinc-300',
                 )}
             >
                 <input
@@ -159,7 +159,7 @@ export function FileField({
                 </span>
             </label>
             {error && (
-                <p className="text-xs font-medium text-zinc-900">{error}</p>
+                <p className="text-xs font-medium text-error">{error}</p>
             )}
         </div>
     );

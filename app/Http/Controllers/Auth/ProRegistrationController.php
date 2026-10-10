@@ -42,6 +42,7 @@ class ProRegistrationController extends Controller
             $user = User::create([
                 'name' => $request->validated('full_name'),
                 'email' => $request->validated('email'),
+                'phone' => User::normalizePhone($request->validated('phone')),
                 'password' => $request->validated('password'),
             ]);
 

@@ -4,6 +4,7 @@ use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
+use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
 
 beforeEach(function () {
@@ -106,4 +107,20 @@ test('already verified user visiting verification link is redirected without fir
 
     Event::assertNotDispatched(Verified::class);
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
+});
+
+test('an account without an email is verified by the link an admin sends', function () {
+    $user = User::factory()->unverified()->create(['email' => null, 'phone' => '243812345678']);
+
+    $this->actingAs($user)->get($user->verificationUrl())
+        ->assertRedirect(route('dashboard', absolute: false).'?verified=1');
+
+    expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
+});
+
+test('the verification screen tells accounts without an email to expect WhatsApp', function () {
+    $user = User::factory()->unverified()->create(['email' => null, 'phone' => '243812345678']);
+
+    $this->actingAs($user)->get(route('verification.notice'))
+        ->assertInertia(fn (Assert $page) => $page->where('hasEmail', false));
 });

@@ -52,7 +52,10 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::createUsersUsing(CreateNewUser::class);
 
         Fortify::authenticateUsing(function (Request $request): ?User {
-            $user = User::where(Fortify::username(), $request->input(Fortify::username()))->first();
+            $username = (string) $request->input(Fortify::username());
+            $user = str_contains($username, '@')
+                ? User::where(Fortify::username(), $username)->first()
+                : User::where('phone', User::normalizePhone($username))->first();
 
             if (! $user || ! Hash::check((string) $request->input('password'), $user->password)) {
                 return null;
@@ -90,6 +93,7 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::verifyEmailView(fn (Request $request) => Inertia::render('auth/verify-email', [
             'status' => $request->session()->get('status'),
+            'hasEmail' => filled($request->user()->email),
         ]));
 
         Fortify::registerView(fn () => Inertia::render('auth/register', [

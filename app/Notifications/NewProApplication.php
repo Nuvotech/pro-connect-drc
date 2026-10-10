@@ -45,6 +45,7 @@ class NewProApplication extends Notification
             ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
             ->line(__(':name has applied to join ProConnect.', ['name' => $name]))
             ->line(__('Services: :services', ['services' => $services]))
+            ->lineIf(blank($this->application->user->email), __('They have no email address: send them their verification link on WhatsApp from the sign-ups page.'))
             ->action(__('Review the application'), route('admin.sign-ups.index', ['application' => $this->application->id]));
     }
 }

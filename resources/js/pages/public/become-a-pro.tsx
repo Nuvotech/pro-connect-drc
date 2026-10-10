@@ -103,12 +103,14 @@ function validateStep(
     }
 
     if (step === 2) {
-        if (data.password.length < 8) {
-            errors.password = 'Use at least 8 characters.';
+        if (data.password.length < 6) {
+            errors.password = t('Use at least 6 characters.');
+        } else if (!/\p{Lu}/u.test(data.password)) {
+            errors.password = t('Include at least one capital letter.');
         }
 
         if (data.password !== data.passwordConfirmation) {
-            errors.passwordConfirmation = 'The passwords do not match.';
+            errors.passwordConfirmation = t('The passwords do not match.');
         }
     }
 
@@ -132,7 +134,10 @@ function validateContact(data: ApplicationData): ApplicationErrors {
         errors.businessName = t('Enter your company name.');
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) {
+    if (
+        data.email.trim() &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())
+    ) {
         errors.email = 'Please enter a valid email address.';
     }
 
@@ -363,29 +368,6 @@ export default function BecomeAPro({
                                     />
                                 </Field>
                                 <Field
-                                    label={t('Email')}
-                                    htmlFor="email"
-                                    error={errors.email}
-                                >
-                                    <input
-                                        id="email"
-                                        type="email"
-                                        autoComplete="email"
-                                        value={data.email}
-                                        onChange={(event) =>
-                                            setField(
-                                                'email',
-                                                event.target.value,
-                                            )
-                                        }
-                                        aria-invalid={Boolean(errors.email)}
-                                        placeholder={t(
-                                            'jean.dupont@example.com',
-                                        )}
-                                        className={inputClassName}
-                                    />
-                                </Field>
-                                <Field
                                     label={t('Phone')}
                                     htmlFor="phone"
                                     error={errors.phone}
@@ -427,6 +409,30 @@ export default function BecomeAPro({
                                         />
                                         {t('Also on WhatsApp')}
                                     </label>
+                                </Field>
+                                <Field
+                                    label={t('Email')}
+                                    htmlFor="email"
+                                    error={errors.email}
+                                    isOptional
+                                >
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        value={data.email}
+                                        onChange={(event) =>
+                                            setField(
+                                                'email',
+                                                event.target.value,
+                                            )
+                                        }
+                                        aria-invalid={Boolean(errors.email)}
+                                        placeholder={t(
+                                            'jean.dupont@example.com',
+                                        )}
+                                        className={inputClassName}
+                                    />
                                 </Field>
                                 <Field
                                     label={t('City')}
@@ -552,7 +558,7 @@ export default function BecomeAPro({
                                     {errors.services && (
                                         <p
                                             role="alert"
-                                            className="text-xs font-medium text-zinc-900"
+                                            className="text-xs font-medium text-error"
                                         >
                                             {errors.services}
                                         </p>
@@ -570,6 +576,9 @@ export default function BecomeAPro({
                                         rows={2}
                                         maxLength={1000}
                                         value={data.description}
+                                        aria-invalid={Boolean(
+                                            errors.description,
+                                        )}
                                         onChange={(event) =>
                                             setField(
                                                 'description',
@@ -593,13 +602,14 @@ export default function BecomeAPro({
                                 number={3}
                                 title={t('Create your account')}
                                 description={t(
-                                    "You'll use it to follow your application and, once approved, build your listing.",
+                                    "You'll sign in with your phone number or email and this password to follow your application.",
                                 )}
                             >
                                 <Field
                                     label={t('Password')}
                                     htmlFor="password"
                                     error={errors.password}
+                                    note={t('6+ characters, 1 capital letter')}
                                 >
                                     <input
                                         id="password"

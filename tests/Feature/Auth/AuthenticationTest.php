@@ -75,3 +75,14 @@ test('users are rate limited', function () {
 
     $response->assertTooManyRequests();
 });
+
+test('users without an email can authenticate with their phone number', function (string $typedPhone) {
+    $user = User::factory()->create(['email' => null, 'phone' => '243812345678']);
+
+    $this->post(route('login.store'), [
+        'email' => $typedPhone,
+        'password' => 'password',
+    ])->assertRedirect(route('dashboard', absolute: false));
+
+    $this->assertAuthenticatedAs($user);
+})->with(['081 234 5678', '81 234 5678', '+243 81 234 5678']);
