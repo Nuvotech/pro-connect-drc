@@ -35,6 +35,8 @@ class ProfessionalListingResource extends JsonResource
             'experienceYears' => $this->experience_years,
             'registryNumber' => $this->registry_number,
             'taxId' => $this->tax_id,
+            'nifNumber' => $this->nif_number,
+            'arspNumber' => $this->arsp_number,
             'bio' => $this->bio,
             'preferredLanguage' => $this->preferred_language,
             'photoUrl' => $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null,

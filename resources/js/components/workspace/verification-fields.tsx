@@ -11,8 +11,9 @@ import type { ProviderType } from '@/types';
 
 /**
  * Registration numbers and private documents. Individuals are verified
- * with an ID document; companies with their RCCM number, tax ID and
- * business registration, so those are marked as needed for each.
+ * with an ID document; companies with their RCCM number and tax ID, so
+ * those are marked as needed for each. The NIF and ARSP numbers and the
+ * business registration document are optional.
  */
 export default function VerificationFields({
     providerType,
@@ -25,6 +26,8 @@ export default function VerificationFields({
     defaults?: {
         registry_number: string | null;
         tax_id: string | null;
+        nif_number: string | null;
+        arsp_number: string | null;
         has_identity_document: boolean;
         has_business_registration: boolean;
     };
@@ -71,6 +74,36 @@ export default function VerificationFields({
                     className={cn(inputClassName, 'font-mono')}
                 />
             </Field>
+            <Field
+                label={t('NIF number')}
+                htmlFor="nif_number"
+                error={errors.nif_number}
+                isOptional
+                className="scroll-mt-24"
+            >
+                <input
+                    id="nif_number"
+                    name="nif_number"
+                    defaultValue={defaults?.nif_number ?? undefined}
+                    aria-invalid={Boolean(errors.nif_number)}
+                    className={cn(inputClassName, 'font-mono')}
+                />
+            </Field>
+            <Field
+                label={t('ARSP number')}
+                htmlFor="arsp_number"
+                error={errors.arsp_number}
+                isOptional
+                className="scroll-mt-24"
+            >
+                <input
+                    id="arsp_number"
+                    name="arsp_number"
+                    defaultValue={defaults?.arsp_number ?? undefined}
+                    aria-invalid={Boolean(errors.arsp_number)}
+                    className={cn(inputClassName, 'font-mono')}
+                />
+            </Field>
             {isCompany && (
                 <FileField
                     id="business_registration"
@@ -87,7 +120,6 @@ export default function VerificationFields({
                     }
                     onFileChange={setRegistrationName}
                     error={errors.business_registration}
-                    note={neededNote}
                 />
             )}
             <FileField

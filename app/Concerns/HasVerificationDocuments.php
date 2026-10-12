@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
  *
  * @property string|null $registry_number
  * @property string|null $tax_id
+ * @property string|null $nif_number
+ * @property string|null $arsp_number
  * @property string|null $identity_document_path
  * @property string|null $business_registration_path
  */
@@ -46,7 +48,6 @@ trait HasVerificationDocuments
         return [
             ['key' => 'registry_number', 'label' => 'RCCM number added', 'isDone' => filled($this->registry_number)],
             ['key' => 'tax_id', 'label' => 'Tax ID (ID NAT) added', 'isDone' => filled($this->tax_id)],
-            ['key' => 'business_registration', 'label' => 'Business registration uploaded', 'isDone' => $this->business_registration_path !== null],
         ];
     }
 

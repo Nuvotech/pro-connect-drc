@@ -94,6 +94,8 @@ trait ListingValidationRules
             'address' => ['nullable', 'string', 'max:255'],
             'registry_number' => ['nullable', 'string', 'max:50'],
             'tax_id' => ['nullable', 'string', 'max:50'],
+            'nif_number' => ['nullable', 'string', 'max:50'],
+            'arsp_number' => ['nullable', 'string', 'max:50'],
             'preferred_language' => ['required', Rule::in(['fr', 'en'])],
             'identity_document' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
             'business_registration' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],

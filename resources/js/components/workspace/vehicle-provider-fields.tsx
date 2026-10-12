@@ -28,6 +28,8 @@ export type VehicleProviderFieldDefaults = {
     address: string | null;
     registry_number: string | null;
     tax_id: string | null;
+    nif_number: string | null;
+    arsp_number: string | null;
     has_identity_document: boolean;
     has_business_registration: boolean;
 };

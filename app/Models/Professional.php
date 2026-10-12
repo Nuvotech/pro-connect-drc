@@ -39,6 +39,8 @@ use Illuminate\Support\Facades\Storage;
  * @property int|null $experience_years
  * @property string|null $registry_number
  * @property string|null $tax_id
+ * @property string|null $nif_number
+ * @property string|null $arsp_number
  * @property string|null $bio
  * @property string $preferred_language
  * @property string|null $photo_path
@@ -68,6 +70,8 @@ use Illuminate\Support\Facades\Storage;
     'experience_years',
     'registry_number',
     'tax_id',
+    'nif_number',
+    'arsp_number',
     'bio',
     'preferred_language',
 ])]

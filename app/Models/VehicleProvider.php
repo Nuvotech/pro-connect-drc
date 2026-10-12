@@ -30,6 +30,8 @@ use Illuminate\Support\Carbon;
  * @property string|null $address
  * @property string|null $registry_number
  * @property string|null $tax_id
+ * @property string|null $nif_number
+ * @property string|null $arsp_number
  * @property string $preferred_language
  * @property string|null $identity_document_path
  * @property string|null $business_registration_path
@@ -50,6 +52,8 @@ use Illuminate\Support\Carbon;
     'address',
     'registry_number',
     'tax_id',
+    'nif_number',
+    'arsp_number',
     'preferred_language',
 ])]
 class VehicleProvider extends Model

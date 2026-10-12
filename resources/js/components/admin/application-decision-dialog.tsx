@@ -253,6 +253,22 @@ function DecisionForm({
                                     {application.taxId ?? '—'}
                                 </dd>
                             </div>
+                            <div>
+                                <dt className="text-xs text-zinc-500">
+                                    {t('NIF')}
+                                </dt>
+                                <dd className="font-mono text-[13px] text-zinc-900">
+                                    {application.nifNumber ?? '—'}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-xs text-zinc-500">
+                                    {t('ARSP')}
+                                </dt>
+                                <dd className="font-mono text-[13px] text-zinc-900">
+                                    {application.arspNumber ?? '—'}
+                                </dd>
+                            </div>
                         </dl>
                     </section>
                 </div>

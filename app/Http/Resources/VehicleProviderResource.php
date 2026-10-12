@@ -31,6 +31,8 @@ class VehicleProviderResource extends JsonResource
             'address' => $this->address,
             'registryNumber' => $this->registry_number,
             'taxId' => $this->tax_id,
+            'nifNumber' => $this->nif_number,
+            'arspNumber' => $this->arsp_number,
             'preferredLanguage' => $this->preferred_language,
             'hasIdentityDocument' => $this->identity_document_path !== null,
             'hasBusinessRegistration' => $this->business_registration_path !== null,

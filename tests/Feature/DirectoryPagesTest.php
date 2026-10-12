@@ -219,6 +219,7 @@ test('a pro approved with documents missing is live without the verified badge',
     'individual with ID on file' => [fn () => Professional::factory()->verified()->create(['identity_document_path' => 'professionals/documents/id.pdf']), true],
     'individual without ID' => [fn () => Professional::factory()->verified()->create(['identity_document_path' => null]), false],
     'company with registration on file' => [fn () => Professional::factory()->company(withRegistration: true)->verified()->create(), true],
+    'company with its numbers but no registration document' => [fn () => Professional::factory()->company(withRegistration: true)->verified()->create(['business_registration_path' => null]), true],
     'company missing its registration' => [fn () => Professional::factory()->company()->verified()->create(), false],
 ]);
 

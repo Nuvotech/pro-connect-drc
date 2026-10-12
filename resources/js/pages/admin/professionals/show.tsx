@@ -35,6 +35,8 @@ type ProfessionalDetail = {
     experienceYears: number | null;
     registryNumber: string | null;
     taxId: string | null;
+    nifNumber: string | null;
+    arspNumber: string | null;
     preferredLanguage: string;
     photoUrl: string | null;
     gallery: string[];
@@ -225,6 +227,16 @@ export default function ShowProfessional({
                                 <DetailRow label={t('Tax ID')}>
                                     <span className="font-mono text-[13px]">
                                         {professional.taxId ?? '—'}
+                                    </span>
+                                </DetailRow>
+                                <DetailRow label={t('NIF')}>
+                                    <span className="font-mono text-[13px]">
+                                        {professional.nifNumber ?? '—'}
+                                    </span>
+                                </DetailRow>
+                                <DetailRow label={t('ARSP')}>
+                                    <span className="font-mono text-[13px]">
+                                        {professional.arspNumber ?? '—'}
                                     </span>
                                 </DetailRow>
                                 <DetailRow label={t('ID document')}>

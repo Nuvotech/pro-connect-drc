@@ -78,6 +78,8 @@ class ProfessionalController extends Controller
                 'experienceYears' => $professional->experience_years,
                 'registryNumber' => $professional->registry_number,
                 'taxId' => $professional->tax_id,
+                'nifNumber' => $professional->nif_number,
+                'arspNumber' => $professional->arsp_number,
                 'preferredLanguage' => $professional->preferred_language,
                 'photoUrl' => $professional->photo_path ? Storage::disk('public')->url($professional->photo_path) : null,
                 'gallery' => $professional->photos->map(fn ($photo) => Storage::disk('public')->url($photo->path))->all(),

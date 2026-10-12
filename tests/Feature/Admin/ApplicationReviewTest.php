@@ -102,7 +102,7 @@ test('the queue shows which registration details a company is still missing', fu
         ->get(route('admin.applications'))
         ->assertInertia(fn (Assert $page) => $page
             ->where('applications.0.providerType', 'company')
-            ->where('applications.0.missingCompanyDetails', ['RCCM number added', 'Tax ID (ID NAT) added', 'Business registration uploaded']));
+            ->where('applications.0.missingCompanyDetails', ['RCCM number added', 'Tax ID (ID NAT) added']));
 });
 
 test('requesting changes or declining needs a message for the pro', function (string $decision) {

@@ -149,6 +149,16 @@ export default function ShowVehicleProvider({
                                         {provider.taxId ?? '—'}
                                     </span>
                                 </DetailRow>
+                                <DetailRow label={t('NIF')}>
+                                    <span className="font-mono text-[13px]">
+                                        {provider.nifNumber ?? '—'}
+                                    </span>
+                                </DetailRow>
+                                <DetailRow label={t('ARSP')}>
+                                    <span className="font-mono text-[13px]">
+                                        {provider.arspNumber ?? '—'}
+                                    </span>
+                                </DetailRow>
                                 <DetailRow label={t('Owner ID')}>
                                     {provider.hasIdentityDocument ? (
                                         <span className="inline-flex items-center gap-1">

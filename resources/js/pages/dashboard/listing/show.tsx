@@ -138,6 +138,16 @@ export default function ShowListing({
                                     {listing.taxId ?? '—'}
                                 </span>
                             </Detail>
+                            <Detail label={t('NIF')}>
+                                <span className="font-mono text-[13px]">
+                                    {listing.nifNumber ?? '—'}
+                                </span>
+                            </Detail>
+                            <Detail label={t('ARSP')}>
+                                <span className="font-mono text-[13px]">
+                                    {listing.arspNumber ?? '—'}
+                                </span>
+                            </Detail>
                             <Detail label={t('ID document')}>
                                 {listing.hasIdentityDocument ? (
                                     <span className="inline-flex items-center gap-1">

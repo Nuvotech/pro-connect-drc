@@ -112,6 +112,20 @@ test('changing the RCCM number sends the fleet back for verification', function 
     expect($provider->fresh()->isVerified())->toBeFalse();
 });
 
+test('the optional NIF and ARSP numbers are saved without sending the fleet back for verification', function () {
+    $pro = User::factory()->create();
+    $provider = VehicleProvider::factory()->verified()->for($pro)->locatedIn('Kinshasa', 'Limete')->create(Arr::except(fleetDetailsPayload(), ['city', 'commune']));
+
+    $this->actingAs($pro)
+        ->patch(route('dashboard.fleet.update'), fleetDetailsPayload(['nif_number' => 'A1234567B', 'arsp_number' => 'ARSP/2026/00412']))
+        ->assertSessionHasNoErrors();
+
+    expect($provider->fresh())
+        ->nif_number->toBe('A1234567B')
+        ->arsp_number->toBe('ARSP/2026/00412')
+        ->isVerified()->toBeTrue();
+});
+
 test('a company fleet can be saved before its registration documents are on file', function () {
     Storage::fake('public');
     $pro = User::factory()->create();
@@ -129,7 +143,7 @@ test('a company fleet can be saved before its registration documents are on file
         ->isCompany()->toBeTrue()
         ->isVerified()->toBeFalse()
         ->and(collect($provider->completionChecklist())->pluck('key')->all())
-        ->toBe(['vehicles', 'vehicle_photos', 'registry_number', 'tax_id', 'business_registration']);
+        ->toBe(['vehicles', 'vehicle_photos', 'registry_number', 'tax_id']);
 });
 
 test('uploading a business registration sends a verified company fleet back for verification', function () {

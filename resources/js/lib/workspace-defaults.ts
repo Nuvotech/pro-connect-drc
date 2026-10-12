@@ -30,6 +30,8 @@ export function professionalDefaults(
         address: listing.address,
         registry_number: listing.registryNumber,
         tax_id: listing.taxId,
+        nif_number: listing.nifNumber,
+        arsp_number: listing.arspNumber,
         has_photo: listing.photoUrl !== null,
         has_cover: listing.coverUrl !== null,
         has_identity_document: listing.hasIdentityDocument,
@@ -53,6 +55,8 @@ export function vehicleProviderDefaults(
         address: provider.address,
         registry_number: provider.registryNumber,
         tax_id: provider.taxId,
+        nif_number: provider.nifNumber,
+        arsp_number: provider.arspNumber,
         has_identity_document: provider.hasIdentityDocument,
         has_business_registration: provider.hasBusinessRegistration,
     };

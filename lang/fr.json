@@ -1246,7 +1246,6 @@
     "Choose whether you work for yourself or for a company.": "Indiquez si vous travaillez à votre compte ou pour une entreprise.",
     "Enter your company name.": "Saisissez le nom de votre entreprise.",
     "Tax ID (ID NAT) added": "ID NAT ajouté",
-    "Business registration uploaded": "Extrait RCCM téléversé",
     "RCCM number added": "Numéro RCCM ajouté",
     "ID document uploaded": "Pièce d'identité téléversée",
     "How do you work?": "Comment travaillez-vous ?",
@@ -1316,5 +1315,9 @@
     "Services clients can browse": "Services que les clients peuvent parcourir",
     "Francs per dollar, set by the team": "Francs pour un dollar, fixé par l'équipe",
     "Francs per dollar, fetched automatically": "Francs pour un dollar, récupéré automatiquement",
-    "No rate yet. Set one": "Aucun taux pour le moment. Définissez-en un"
+    "No rate yet. Set one": "Aucun taux pour le moment. Définissez-en un",
+    "NIF number": "Numéro NIF",
+    "ARSP number": "Numéro ARSP",
+    "NIF": "NIF",
+    "ARSP": "ARSP"
 }

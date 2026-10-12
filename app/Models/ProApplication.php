@@ -164,6 +164,8 @@ class ProApplication extends Model
             'address' => null,
             'registry_number' => null,
             'tax_id' => null,
+            'nif_number' => null,
+            'arsp_number' => null,
             'has_identity_document' => false,
             'has_business_registration' => false,
         ];

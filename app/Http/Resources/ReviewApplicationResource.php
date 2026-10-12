@@ -50,6 +50,8 @@ class ReviewApplicationResource extends JsonResource
             'experienceYears' => $isProfessional ? $this->experience_years : null,
             'registryNumber' => $this->registry_number,
             'taxId' => $this->tax_id,
+            'nifNumber' => $this->nif_number,
+            'arspNumber' => $this->arsp_number,
             'reviewStatus' => $this->review_status,
             'isVerified' => $this->isVerified(),
             'submittedAt' => $this->submitted_at?->format('M j, Y · H:i'),

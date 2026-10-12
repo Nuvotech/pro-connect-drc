@@ -56,6 +56,8 @@ export type ReviewApplication = {
     experienceYears: number | null;
     registryNumber: string | null;
     taxId: string | null;
+    nifNumber: string | null;
+    arspNumber: string | null;
     reviewStatus: ReviewStatus;
     isVerified: boolean;
     submittedAt: string | null;
@@ -131,6 +133,8 @@ export type VehicleProviderDetail = {
     address: string | null;
     registryNumber: string | null;
     taxId: string | null;
+    nifNumber: string | null;
+    arspNumber: string | null;
     preferredLanguage: string;
     hasIdentityDocument: boolean;
     hasBusinessRegistration: boolean;
@@ -180,6 +184,8 @@ export type ProfessionalListing = {
     experienceYears: number | null;
     registryNumber: string | null;
     taxId: string | null;
+    nifNumber: string | null;
+    arspNumber: string | null;
     bio: string | null;
     preferredLanguage: string;
     photoUrl: string | null;
