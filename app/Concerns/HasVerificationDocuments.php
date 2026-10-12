@@ -25,6 +25,11 @@ trait HasVerificationDocuments
     abstract protected function documentDirectory(): string;
 
     /**
+     * Determine whether an admin has approved the listing.
+     */
+    abstract public function isVerified(): bool;
+
+    /**
      * The verification items for this kind of provider, keyed so the
      * dashboard can link to the field that fixes each one.
      *
@@ -62,6 +67,17 @@ trait HasVerificationDocuments
             ->pluck('label')
             ->values()
             ->all();
+    }
+
+    /**
+     * Determine whether clients see the verified badge: the listing is
+     * approved and every verification item is on file. A listing approved
+     * with items missing is live, but without the badge.
+     */
+    public function hasVerifiedBadge(): bool
+    {
+        return $this->isVerified()
+            && collect($this->verificationChecklist())->every(fn (array $item) => $item['isDone']);
     }
 
     /**

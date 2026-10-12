@@ -11,6 +11,7 @@ import { t } from '@/lib/i18n';
 type PublicFleet = {
     slug: string;
     name: string;
+    isVerified: boolean;
     isCompany: boolean;
     city: string | null;
     commune: string | null;
@@ -43,16 +44,18 @@ export default function Fleet({
             <header className="border-b border-outline-variant bg-surface-container-low px-page py-12">
                 <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <p className="flex items-center gap-1 text-label-sm text-primary">
-                            <MaterialSymbol
-                                name="verified"
-                                filled
-                                className="text-base"
-                            />
-                            {fleet.isCompany
-                                ? t('Verified company')
-                                : t('Verified fleet')}
-                        </p>
+                        {fleet.isVerified && (
+                            <p className="flex items-center gap-1 text-label-sm text-primary">
+                                <MaterialSymbol
+                                    name="verified"
+                                    filled
+                                    className="text-base"
+                                />
+                                {fleet.isCompany
+                                    ? t('Verified company')
+                                    : t('Verified fleet')}
+                            </p>
+                        )}
                         <h1 className="mt-1 text-headline-lg text-on-surface md:text-display-lg">
                             {fleet.name}
                         </h1>

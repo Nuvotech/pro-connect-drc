@@ -12,7 +12,12 @@ import type { FleetVehicle } from '@/types';
 import { t } from '@/lib/i18n';
 
 type PublicVehicle = FleetVehicle & {
-    fleet: { slug: string; name: string; city: string | null };
+    fleet: {
+        slug: string;
+        name: string;
+        city: string | null;
+        isVerified: boolean;
+    };
 };
 
 type VehicleFilters = {
@@ -336,11 +341,13 @@ export default function Vehicles({
                                         )}
                                         footer={
                                             <>
-                                                <MaterialSymbol
-                                                    name="verified"
-                                                    filled
-                                                    className="text-base text-primary"
-                                                />
+                                                {vehicle.fleet.isVerified && (
+                                                    <MaterialSymbol
+                                                        name="verified"
+                                                        filled
+                                                        className="text-base text-primary"
+                                                    />
+                                                )}
                                                 <span className="truncate">
                                                     {vehicle.fleet.name}
                                                     {vehicle.fleet.city &&

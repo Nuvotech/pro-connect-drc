@@ -206,6 +206,37 @@ test('a verified pro has a public profile with published reviews', function () {
             ->where('reviews.0.comment', 'Fixed the leak quickly.'));
 });
 
+test('a pro approved with documents missing is live without the verified badge', function (Closure $makeProfessional, bool $hasBadge) {
+    $professional = $makeProfessional();
+
+    $this->get(route('professionals.show', $professional->slug))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('professional.isVerified', $hasBadge));
+
+    $this->get(route('search'))
+        ->assertInertia(fn (Assert $page) => $page->where('professionals.data.0.isVerified', $hasBadge));
+})->with([
+    'individual with ID on file' => [fn () => Professional::factory()->verified()->create(['identity_document_path' => 'professionals/documents/id.pdf']), true],
+    'individual without ID' => [fn () => Professional::factory()->verified()->create(['identity_document_path' => null]), false],
+    'company with registration on file' => [fn () => Professional::factory()->company(withRegistration: true)->verified()->create(), true],
+    'company missing its registration' => [fn () => Professional::factory()->company()->verified()->create(), false],
+]);
+
+test('a fleet approved with documents missing is live without the verified badge', function (Closure $makeFleet, bool $hasBadge) {
+    $fleet = $makeFleet();
+    Vehicle::factory()->for($fleet, 'provider')->create();
+
+    $this->get(route('fleets.show', $fleet->slug))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('fleet.isVerified', $hasBadge));
+
+    $this->get(route('vehicles.index'))
+        ->assertInertia(fn (Assert $page) => $page->where('vehicles.data.0.fleet.isVerified', $hasBadge));
+})->with([
+    'registration on file' => [fn () => VehicleProvider::factory()->company(withRegistration: true)->verified()->create(), true],
+    'registration missing' => [fn () => VehicleProvider::factory()->company()->verified()->create(), false],
+]);
+
 test('unverified pros have no public profile', function () {
     $professional = Professional::factory()->create();
 

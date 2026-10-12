@@ -51,7 +51,7 @@ class PublicProfessionalResource extends JsonResource
             'reviewsCount' => (int) $this->reviews_count,
             'summary' => Str::limit($paragraphs[0] ?? implode(', ', $categoryNames), 140),
             'tags' => array_slice($categoryNames, 0, 3),
-            'isVerified' => $this->isVerified(),
+            'isVerified' => $this->hasVerifiedBadge(),
             'isCompany' => $this->isCompany(),
             'experienceYears' => (int) ($this->experience_years ?? 0),
             'serviceArea' => $this->service_area ?? $this->city?->name ?? '',

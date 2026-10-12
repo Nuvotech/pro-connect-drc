@@ -29,6 +29,7 @@ class PublicVehicleResource extends FleetVehicleResource
                 'slug' => $this->provider->slug,
                 'name' => $this->provider->business_name ?? $this->provider->contact_name,
                 'city' => $this->provider->city?->name,
+                'isVerified' => $this->provider->hasVerifiedBadge(),
             ]),
         ];
     }

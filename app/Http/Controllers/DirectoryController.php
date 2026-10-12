@@ -313,6 +313,7 @@ class DirectoryController extends Controller
             'fleet' => [
                 'slug' => $provider->slug,
                 'name' => $provider->business_name ?? $provider->contact_name,
+                'isVerified' => $provider->hasVerifiedBadge(),
                 'isCompany' => $provider->isCompany(),
                 'city' => $provider->city?->name,
                 'commune' => $provider->commune?->name,

@@ -337,17 +337,19 @@ export default function Professional({
                                     {t('WhatsApp')}
                                 </a>
                             )}
-                            <div className="mt-4 flex items-center gap-2 border-t border-outline-variant pt-4 text-sm text-on-surface-variant">
-                                <MaterialSymbol
-                                    name="verified_user"
-                                    className="text-sm text-primary"
-                                />
-                                <span>
-                                    {t(
-                                        'Verified by ProConnect: ID and registration checked',
-                                    )}
-                                </span>
-                            </div>
+                            {professional.isVerified && (
+                                <div className="mt-4 flex items-center gap-2 border-t border-outline-variant pt-4 text-sm text-on-surface-variant">
+                                    <MaterialSymbol
+                                        name="verified_user"
+                                        className="text-sm text-primary"
+                                    />
+                                    <span>
+                                        {t(
+                                            'Verified by ProConnect: ID and registration checked',
+                                        )}
+                                    </span>
+                                </div>
+                            )}
                         </div>
 
                         <div className="rounded-xl border border-outline-variant bg-surface-container-low p-6 text-center shadow-sm">
