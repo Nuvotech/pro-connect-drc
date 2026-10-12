@@ -4,6 +4,7 @@ import {
     Banknote,
     ClipboardList,
     FileCheck2,
+    LayoutDashboard,
     Mail,
     Settings,
     Tags,
@@ -16,7 +17,7 @@ import type { ReactNode } from 'react';
 import type { WorkspaceNavGroup } from '@/components/workspace/workspace-sidebar';
 import CapturerLayout from '@/layouts/capturer-layout';
 import WorkspaceLayout from '@/layouts/workspace-layout';
-import { applications } from '@/routes/admin';
+import { applications, dashboard } from '@/routes/admin';
 import { edit as editExchangeRate } from '@/routes/admin/exchange-rate';
 import { index as messagesIndex } from '@/routes/admin/messages';
 import { index as reviewsIndex } from '@/routes/admin/reviews';
@@ -37,6 +38,16 @@ function adminNavGroups(
     unreadMessageCount?: number | null,
 ): WorkspaceNavGroup[] {
     return [
+        {
+            title: 'Home',
+            items: [
+                {
+                    title: 'Overview',
+                    icon: LayoutDashboard,
+                    href: dashboard.url(),
+                },
+            ],
+        },
         {
             title: 'Admissions',
             items: [
@@ -145,7 +156,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     return (
         <WorkspaceLayout
             badge={t('Admin')}
-            homeHref={applications.url()}
+            homeHref={dashboard.url()}
             navGroups={adminNavGroups(
                 reviewQueueCount,
                 signUpQueueCount,

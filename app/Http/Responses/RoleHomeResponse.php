@@ -29,7 +29,7 @@ class RoleHomeResponse implements LoginResponse, RegisterResponse, TwoFactorLogi
         $user = $request->user();
 
         if ($user?->isAdmin()) {
-            return redirect()->intended(route('admin.applications'));
+            return redirect()->intended(route('admin.dashboard'));
         }
 
         if ($user?->isCapturer()) {

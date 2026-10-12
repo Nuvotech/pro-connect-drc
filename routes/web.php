@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ApplicationDecisionController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\CustomerRequestController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExchangeRateController;
 use App\Http\Controllers\Admin\ListingDocumentController;
 use App\Http\Controllers\Admin\ProApplicationController;
@@ -158,6 +159,8 @@ Route::middleware(['auth', 'verified', 'capturer'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', AdminDashboardController::class)->name('dashboard');
+
     Route::prefix('categories')->name('categories.')->controller(AdminCategoryController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');

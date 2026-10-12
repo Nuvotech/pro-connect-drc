@@ -8,6 +8,7 @@ test('pros cannot open the admin panel', function (string $method, Closure $url)
         ->{$method}($url())
         ->assertForbidden();
 })->with([
+    'dashboard' => ['get', fn () => route('admin.dashboard')],
     'applications' => ['get', fn () => route('admin.applications')],
     'professionals list' => ['get', fn () => route('admin.professionals.index')],
     'onboard professional' => ['post', fn () => route('admin.professionals.store')],
@@ -31,7 +32,7 @@ test('admins land on the admin panel after logging in', function () {
     $admin = User::factory()->admin()->create();
 
     $this->post(route('login.store'), ['email' => $admin->email, 'password' => 'password'])
-        ->assertRedirect(route('admin.applications'));
+        ->assertRedirect(route('admin.dashboard'));
 });
 
 test('pros land on their dashboard after logging in', function () {
@@ -53,7 +54,7 @@ test('a pro is not sent back to an admin page after logging in', function () {
 test('admins are sent from the dashboard to the admin panel', function () {
     $this->actingAs(User::factory()->admin()->create())
         ->get(route('dashboard'))
-        ->assertRedirect(route('admin.applications'));
+        ->assertRedirect(route('admin.dashboard'));
 });
 
 test('the make-admin command promotes a user', function () {

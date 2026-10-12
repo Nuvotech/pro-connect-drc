@@ -21,7 +21,7 @@ class DashboardController extends Controller
         $user = $request->user();
 
         if ($user->isAdmin()) {
-            return to_route('admin.applications');
+            return to_route('admin.dashboard');
         }
 
         if ($user->isCustomer()) {
