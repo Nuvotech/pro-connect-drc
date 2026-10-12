@@ -394,7 +394,8 @@ function ApplicationDetail({
 }) {
     const { categoryName } = useCategories();
     const missingItems = application.checklist.filter((item) => !item.isDone);
-    const canApprove = application.missingCompanyDetails.length === 0;
+    const hasMissingCompanyDetails =
+        application.missingCompanyDetails.length > 0;
     const latestDecision = application.reviews.find(
         (review) => review.reviewerName !== null,
     );
@@ -686,9 +687,9 @@ function ApplicationDetail({
                 )}
             </section>
 
-            {!canApprove && (
+            {hasMissingCompanyDetails && (
                 <p
-                    id={`approve-blocked-${application.key}`}
+                    id={`approve-notice-${application.key}`}
                     className="flex items-start gap-2 px-6 pt-6 text-sm text-zinc-700"
                 >
                     <Info
@@ -696,7 +697,7 @@ function ApplicationDetail({
                         aria-hidden="true"
                     />
                     {t(
-                        'A company can only be verified once its registration is on file. Still missing: :items.',
+                        'Company registration still missing: :items. You can approve now and collect it later.',
                         {
                             items: application.missingCompanyDetails
                                 .map((item) => t(item))
@@ -709,13 +710,12 @@ function ApplicationDetail({
                 <button
                     type="button"
                     onClick={() => onDecide('approve')}
-                    disabled={!canApprove}
                     aria-describedby={
-                        canApprove
-                            ? undefined
-                            : `approve-blocked-${application.key}`
+                        hasMissingCompanyDetails
+                            ? `approve-notice-${application.key}`
+                            : undefined
                     }
-                    className="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-container disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500"
+                    className="inline-flex h-10 cursor-pointer items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-white transition-colors duration-200 hover:bg-primary-container"
                 >
                     {t('Approve')}
                 </button>

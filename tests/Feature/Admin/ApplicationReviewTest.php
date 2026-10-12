@@ -75,18 +75,18 @@ test('approving a listing verifies it, logs the decision and emails the pro', fu
     Notification::assertSentTo($pro, ListingReviewed::class, fn (ListingReviewed $notification) => $notification->status === 'approved');
 });
 
-test('a company cannot be verified until its registration is on file', function () {
+test('a company can be verified while its registration is still missing', function () {
     $provider = VehicleProvider::factory()->company()->create(['registry_number' => 'CD/KIN/RCCM/15-B-07731']);
 
     $this->actingAs(User::factory()->admin()->create())
         ->post(route('admin.applications.decision', ['type' => 'vehicle_provider', 'id' => $provider->id]), ['decision' => 'approve'])
-        ->assertSessionHasErrors(['decision' => 'A company can only be verified once its registration is on file. Still missing: Tax ID (ID NAT) added, Business registration uploaded.']);
+        ->assertSessionHasNoErrors();
 
-    expect($provider->fresh()->isVerified())->toBeFalse();
+    expect($provider->fresh()->isVerified())->toBeTrue();
 });
 
-test('a company with its registration on file can be verified', function () {
-    $professional = Professional::factory()->company(withRegistration: true)->create(['identity_document_path' => null]);
+test('an individual can be verified without an ID document', function () {
+    $professional = Professional::factory()->create(['identity_document_path' => null]);
 
     $this->actingAs(User::factory()->admin()->create())
         ->post(route('admin.applications.decision', ['type' => 'professional', 'id' => $professional->id]), ['decision' => 'approve'])
@@ -95,7 +95,7 @@ test('a company with its registration on file can be verified', function () {
     expect($professional->fresh()->isVerified())->toBeTrue();
 });
 
-test('the queue shows what a company still needs before it can be verified', function () {
+test('the queue shows which registration details a company is still missing', function () {
     VehicleProvider::factory()->company()->create(['submitted_at' => now()]);
 
     $this->actingAs(User::factory()->admin()->create())

@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * The registration details and private documents a listing needs before
- * it can be verified. Individuals prove who they are with an ID document;
- * companies prove they are registered.
+ * The registration details and private documents a listing is asked for.
+ * Individuals prove who they are with an ID document; companies prove
+ * they are registered.
  *
  * @property string|null $registry_number
  * @property string|null $tax_id
@@ -46,8 +46,8 @@ trait HasVerificationDocuments
     }
 
     /**
-     * Company registration details still missing. A company can't be
-     * verified until this is empty.
+     * Company registration details still missing. Admins see these when
+     * reviewing, but can approve the listing and collect them later.
      *
      * @return list<string>
      */

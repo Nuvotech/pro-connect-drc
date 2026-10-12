@@ -129,15 +129,20 @@ test('an admin can onboard a verified professional with a photo and ID document'
     Storage::disk('public')->assertMissing($professional->identity_document_path);
 });
 
-test('a company cannot be marked as verified without its business registration', function () {
+test('a company can be onboarded as verified without its registration details', function () {
     $this->actingAs(User::factory()->admin()->create())
         ->post(route('admin.professionals.store'), validProfessionalPayload([
             'provider_type' => 'company',
             'is_verified' => '1',
+            'registry_number' => '',
+            'tax_id' => '',
         ]))
-        ->assertSessionHasErrors(['is_verified' => 'Add the RCCM number, tax ID and business registration before verifying a company.']);
+        ->assertSessionHasNoErrors();
 
-    expect(Professional::count())->toBe(0);
+    expect(Professional::sole())
+        ->isCompany()->toBeTrue()
+        ->isVerified()->toBeTrue()
+        ->business_registration_path->toBeNull();
 });
 
 test('a company can be onboarded as verified with its business registration', function () {

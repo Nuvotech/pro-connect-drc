@@ -6,7 +6,6 @@ use App\Models\Professional;
 use App\Models\VehicleProvider;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
 
 trait ListingValidationRules
 {
@@ -75,23 +74,6 @@ trait ListingValidationRules
             'phone.regex' => __('Enter a phone number of at least 9 digits.'),
             'email.unique' => __('A vehicle provider with this email is already registered.'),
         ];
-    }
-
-    /**
-     * Stops a company being marked as verified while onboarding it before
-     * its registration details and document are on file.
-     */
-    protected function companyVerificationCheck(): callable
-    {
-        return function (Validator $validator) {
-            if (! $this->boolean('is_verified') || $this->input('provider_type') !== Professional::PROVIDER_COMPANY) {
-                return;
-            }
-
-            if (blank($this->input('registry_number')) || blank($this->input('tax_id')) || ! $this->hasFile('business_registration')) {
-                $validator->errors()->add('is_verified', __('Add the RCCM number, tax ID and business registration before verifying a company.'));
-            }
-        };
     }
 
     /**

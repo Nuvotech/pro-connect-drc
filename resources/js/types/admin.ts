@@ -62,7 +62,7 @@ export type ReviewApplication = {
     submittedAgo: string | null;
     checklist: ChecklistItem[];
     missingCount: number;
-    /** Company registration items still missing; approval is blocked until empty. */
+    /** Company registration items still missing; shown as a notice, approval is still allowed. */
     missingCompanyDetails: string[];
     documents: ReviewDocument[];
     galleryCount: number | null;
